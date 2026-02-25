@@ -21,3 +21,13 @@ Also want to use this opportunity to practice more intentional experimenting wit
 Easy to find SVGs with entire deck of cards in one image
   - Sub-draw SVGs?
     - Does this make sense?
+
+The Gnome Aisleriot SVG is nicely organized, at least.
+  - Wonder if I could split this up programatically into SVG images, then draw those?
+  - How does this compare to drawing a subimage?
+    - Seems like it potentially has to render everything
+      - since it doesn't know what's within sub image region
+  - Seems like there's going to be lots of issues with rasterizing if I try to do this way
+    - Really, I only care about rasterizing when window is resized
+      - Maybe just force that once, then draw rasterized subimages?
+        - Not anticipating any other zooming 
