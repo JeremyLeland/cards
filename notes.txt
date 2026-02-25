@@ -1,0 +1,16 @@
+2/25/2026:
+
+Taking a break from the roads and intersections madness, want to play with some cards
+  - I haven't made a card game before
+  - Could try solitaire, or even something simple like Go Fish
+  - I feel like the rabbit hole here will probably be the cards themselves
+  - Feels like something I could generate
+    - Text and emoticons?
+  - Could also try finding existing SVG and use those
+    - I just like the idea of vector, don't really want to do raster images
+      - Although I'm sure there are tons
+    - Would it make sense to create my own SVG programatically and draw that?
+      - As opposed to just functions to draw?
+      - If I have an SVG, is it easier to do transforms with drawImage?
+        - Fake 3D rotation by scaling along the Y axis?
+
