@@ -30,4 +30,12 @@ The Gnome Aisleriot SVG is nicely organized, at least.
   - Seems like there's going to be lots of issues with rasterizing if I try to do this way
     - Really, I only care about rasterizing when window is resized
       - Maybe just force that once, then draw rasterized subimages?
-        - Not anticipating any other zooming 
+        - Not anticipating any other zooming
+  - Could also do this rasterize once for every frame for now
+    - It's what would be happening anyway at some point
+    - Just force it to happen at desired scale at beginning
+      - Then we don't need to keep track of when zoom or screen size changes
+        - If it's colloassally slow, then revist above
+      - Pathalogical case, every card is visible exactly once
+        - We're just segmenting it
+        - So either it can do this in a frame or it can't
