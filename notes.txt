@@ -14,3 +14,10 @@ Taking a break from the roads and intersections madness, want to play with some 
       - If I have an SVG, is it easier to do transforms with drawImage?
         - Fake 3D rotation by scaling along the Y axis?
 
+Also want to use this opportunity to practice more intentional experimenting with branches
+  - Branch for drawing sub images from large SVGs
+    - Might screw this file up, guess we'll see
+
+Easy to find SVGs with entire deck of cards in one image
+  - Sub-draw SVGs?
+    - Does this make sense?
