@@ -1,8 +1,8 @@
 const SHEET_COLS = 13;
 const SHEET_ROWS = 5;
 
-const cssWidth = 900;
-const cssHeight = 600;
+const cssWidth = 1400;
+const cssHeight = 700;
 
 // HiDPI canvas needs larger image for same display size
 const canvas = document.createElement( 'canvas' );
@@ -33,22 +33,24 @@ image.onload = async () => {
   const CARD_WIDTH = image.width / SHEET_COLS;
   const CARD_HEIGHT = image.height / SHEET_ROWS;
 
-  for ( let i = 0; i < 13; i ++ ) {
-    ctx.drawImage( 
-      off,
+  for ( let suit = 0; suit < 4; suit ++ ) {
+    for ( let rank = 1; rank <= 13; rank ++ ) {
+      ctx.drawImage( 
+        off,
 
-      // source image is HiDPI
-      i * CARD_WIDTH * scale, 
-      0 * CARD_HEIGHT * scale, 
-      CARD_WIDTH * scale,
-      CARD_HEIGHT * scale,
-      
-      // destination is css location
-      i * CARD_WIDTH, 
-      ( i % 2 ) * CARD_HEIGHT, 
-      CARD_WIDTH, 
-      CARD_HEIGHT,
-    );
+        // source image is HiDPI
+        ( rank - 1 ) * CARD_WIDTH * scale, 
+        suit * CARD_HEIGHT * scale, 
+        CARD_WIDTH * scale,
+        CARD_HEIGHT * scale,
+        
+        // destination is css location
+        ( rank - 1 ) * CARD_WIDTH / 2,
+        suit * CARD_HEIGHT / 2, 
+        CARD_WIDTH / 2, 
+        CARD_HEIGHT / 2,
+      );
+    }
   }
 }
 
