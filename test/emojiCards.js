@@ -11,6 +11,8 @@ const Card = {
   FontSize: 20,
   Suits: [ 'Club', 'Diamond', 'Heart', 'Spade' ],  // English alphabetical order, for now
   Ranks: [ '', 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K' ],
+
+  // TODO: Shorten this up: create new lists by adding to earlier lists?
   Positions: [
     [],   // no rank 0
     // A
@@ -107,7 +109,31 @@ const Card = {
       [ 0.3, 0.75 ],
       [ 0.7, 0.75 ],
     ],
-  ]
+
+    // J
+    [
+      [ 0.5, 0.3 ],
+      [ 0.5, 0.7 ],
+    ],
+
+    // Q
+    [
+      [ 0.5, 0.3 ],
+      [ 0.5, 0.7 ],
+    ],
+
+    // K
+    [
+      [ 0.5, 0.3 ],
+      [ 0.5, 0.7 ],
+    ],
+  ],
+  Faces: [
+    [ '🧛🏻‍♂️', '👸🏻', '🤴🏻' ],   // clubs
+    [ '🧛🏼‍♂️', '👸🏼', '🤴🏼' ],   // diamonds
+    [ '🧛🏽‍♂️', '👸🏽', '🤴🏽' ],   // hearts
+    [ '🧛🏿‍♂️', '👸🏿', '🤴🏿' ],   // spades
+  ],
 };
 
 function resizeCanvas( canvas, width, height ) {
@@ -121,7 +147,7 @@ function resizeCanvas( canvas, width, height ) {
 const canvas = document.createElement( 'canvas' );
 document.body.appendChild( canvas );
 
-resizeCanvas( canvas, 900, 600 );
+resizeCanvas( canvas, 1000, 600 );
 
 const ctx = canvas.getContext( '2d' );
 
@@ -192,7 +218,12 @@ function drawCard( rank, suit ) {
         ctx.scale( 1.5, 1.5 );
       }
 
-      ctx.fillText( suitIcon, 0, 0 );
+      if ( rank > 10 ) {
+        ctx.scale( 2.5, 2.5 );
+      }
+
+      const icon = rank > 10 ? Card.Faces[ suit ][ rank - 11 ] : suitIcon;
+      ctx.fillText( icon, 0, 0 );
     }
     ctx.restore();
   } );
