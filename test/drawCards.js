@@ -7,26 +7,34 @@ resizeCanvas( canvas, 2000, 1000 );
 
 const ctx = canvas.getContext( '2d' );
 
-ctx.fillStyle = '#123';
-ctx.fillRect( 0, 0, canvas.width * devicePixelRatio, canvas.height * devicePixelRatio );
 
-Card.draw( ctx, Card.Rank[ '7' ], Card.Suit.Club );
 
-ctx.translate( 100, 100 );
+const cards = [
+  { x: 0,   y: 0,   rank: Card.Rank.Seven,  suit: Card.Suit.Clubs     },
+  { x: 120, y: 120, rank: Card.Rank.Three,  suit: Card.Suit.Hearts    },
+  { x: 240, y: 240, rank: Card.Rank.Ace,    suit: Card.Suit.Diamonds  },
+  { x: 360, y: 360, rank: Card.Rank.Queen,  suit: Card.Suit.Spades    },
+  { x: 480, y: 480, rank: Card.Rank.Jack,   suit: Card.Suit.Hearts    },
+];
 
-Card.draw( ctx, Card.Rank[ '3' ], Card.Suit.Heart );
+function draw() {
 
-ctx.translate( 200, 100 );
+  // scaleX, skewY, skewX, scaleY, translateX, translateY
+  ctx.setTransform( devicePixelRatio, 0, 0, devicePixelRatio, 0, 0 );
 
-Card.draw( ctx, Card.Rank.Ace, Card.Suit.Diamond );
+  ctx.fillStyle = '#123';
+  ctx.fillRect( 0, 0, canvas.width * devicePixelRatio, canvas.height * devicePixelRatio );
 
-ctx.translate( 200, 100 );
+  cards.forEach( card => {
+    ctx.save(); {
+      ctx.translate( card.x, card.y );
+      Card.draw( ctx, card.rank, card.suit );
+    }
+    ctx.restore();
+  } );
+}
 
-Card.draw( ctx, Card.Rank.Queen, Card.Suit.Spade );
-
-ctx.translate( 200, -100 );
-
-Card.draw( ctx, Card.Rank[ 'Jack' ], Card.Suit.Heart )
+draw();
 
 
 function resizeCanvas( canvas, width, height ) {
@@ -36,3 +44,39 @@ function resizeCanvas( canvas, width, height ) {
   canvas.width = width * devicePixelRatio; 
   canvas.height = height * devicePixelRatio;
 }
+
+let active;
+
+canvas.addEventListener( 'pointerdown', e => {
+  // for this test, we are scrolling around large canvas, so we want pageX/Y
+  const mx = e.pageX;
+  const my = e.pageY;
+
+  cards.forEach( card => {
+    if ( card.x <= mx && mx <= card.x + Card.Width &&
+         card.y <= my && my <= card.y + Card.Height ) {
+      active = card;
+    }
+  } );
+
+  cards.push( cards.splice( cards.indexOf( active ), 1 )[ 0 ] );
+
+  draw();
+} );
+
+canvas.addEventListener( 'pointerup', e => {
+  active = null;
+} );
+
+canvas.addEventListener( 'pointercancel', e => {
+  active = null;
+} );
+
+canvas.addEventListener( 'pointermove', e => {
+  if ( active && e.buttons == 1 ) {
+    active.x += e.movementX;
+    active.y += e.movementY;
+
+    draw();
+  }
+} );

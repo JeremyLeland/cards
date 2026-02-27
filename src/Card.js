@@ -1,27 +1,29 @@
+export const Width = 200, Height = 300;
+
 export const Rank = {
-  'Ace': 0,
-  '2': 1,
-  '3': 2,
-  '4': 3,
-  '5': 4,
-  '6': 5,
-  '7': 6,
-  '8': 7,
-  '9': 8,
-  '10': 9,
-  'Jack': 10,
-  'Queen': 11,
-  'King': 12,
+  Ace:    0,
+  Two:    1,
+  Three:  2,
+  Four:   3,
+  Five:   4,
+  Six:    5,
+  Seven:  6,
+  Eight:  7,
+  Nine:   8,
+  Ten:    9,
+  Jack:   10,
+  Queen:  11,
+  King:   12,
 };
 
 const RankLabels = [ 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K' ];
 
 // English alphabetical order, for now
 export const Suit = {
-  'Club': 0,
-  'Diamond': 1,
-  'Heart': 2,
-  'Spade': 3,
+  Clubs:     0,
+  Diamonds:  1,
+  Hearts:    2,
+  Spades:    3,
 };
 
 const SuitIcons = [ '♣️', '♦️', '♥️', '♠️' ];
@@ -33,8 +35,6 @@ const FaceIcons = [
 ];
 
 const Card = {
-  Width: 200,
-  Height: 300,
   FontSize: 40,
 
   // TODO: Shorten this up: create new lists by adding to earlier lists?
@@ -161,11 +161,11 @@ export function draw( ctx, rank, suit ) {
   ctx.lineWidth = 2;
 
   ctx.beginPath();
-  ctx.roundRect( 0, 0, Card.Width, Card.Height, 10 );
+  ctx.roundRect( 0, 0, Width, Height, 10 );
   ctx.fill();
   ctx.stroke();
 
-  ctx.fillStyle = suit == Suit.Club || suit == Suit.Spade ? 'black' : 'red';
+  ctx.fillStyle = suit == Suit.Clubs || suit == Suit.Spades ? 'black' : 'red';
   ctx.font = `${ Card.FontSize }px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -183,7 +183,7 @@ export function draw( ctx, rank, suit ) {
   ctx.restore();
 
   ctx.save(); {
-    ctx.translate( Card.Width - Card.FontSize / 2, Card.Height - Card.FontSize );
+    ctx.translate( Width - Card.FontSize / 2, Height - Card.FontSize );
     ctx.rotate( Math.PI );
     ctx.fillText( rankLabel, 0, 0 );
     ctx.translate( 0, 0.75 * Card.FontSize );
@@ -194,7 +194,7 @@ export function draw( ctx, rank, suit ) {
 
   Card.Positions[ rank ].forEach( pos => {
     ctx.save(); {
-      ctx.translate( Card.Width * pos[ 0 ], Card.Height * pos[ 1 ] );
+      ctx.translate( Width * pos[ 0 ], Height * pos[ 1 ] );
       
       // Flip lower icons
       if ( pos[ 1 ] > 0.5 ) {
@@ -206,11 +206,11 @@ export function draw( ctx, rank, suit ) {
         ctx.scale( 1.5, 1.5 );
       }
 
-      if ( rank > Rank[ '10' ] ) {
+      if ( rank > Rank.Ten ) {
         ctx.scale( 2.5, 2.5 );
       }
 
-      const icon = rank > Rank[ '10' ] ? FaceIcons[ rank - Rank.Jack ][ suit ] : suitIcon;
+      const icon = rank > Rank.Ten ? FaceIcons[ rank - Rank.Jack ][ suit ] : suitIcon;
       ctx.fillText( icon, 0, 0 );
     }
     ctx.restore();
