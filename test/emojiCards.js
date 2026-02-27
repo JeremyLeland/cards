@@ -6,9 +6,9 @@ const Suit = {
 };
 
 const Card = {
-  Width: 100,
-  Height: 150,
-  FontSize: 20,
+  Width: 200,
+  Height: 300,
+  FontSize: 40,
   Suits: [ 'Club', 'Diamond', 'Heart', 'Spade' ],  // English alphabetical order, for now
   Ranks: [ '', 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K' ],
 
@@ -147,7 +147,7 @@ function resizeCanvas( canvas, width, height ) {
 const canvas = document.createElement( 'canvas' );
 document.body.appendChild( canvas );
 
-resizeCanvas( canvas, 1000, 600 );
+resizeCanvas( canvas, 2000, 1000 );
 
 const ctx = canvas.getContext( '2d' );
 
