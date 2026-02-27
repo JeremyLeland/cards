@@ -21,3 +21,20 @@ Also want to use this opportunity to practice more intentional experimenting wit
 Easy to find SVGs with entire deck of cards in one image
   - Sub-draw SVGs?
     - Does this make sense?
+
+SVG drawing was kind of blurry. Dealing with HiDPI adds more headaches.
+  - Got something that worked, but I feel like it's blurry
+  - My custom canvas was causing problems. 
+    - Not sure where, but might be good practice to make a simpler one
+    - Generate a matrix for bounds, apply this matrix to mouse coords?
+      - Is this any easier than what I'm currently doing saving transform and scale separately?
+
+Made another branch to experiment with text and emojis
+  - The numbered cards work nicely
+  - The face cards will probably look weird, but I can generate a few just to finish this off
+  - The text can be stretched with scaling, so I can do my fake 3D turns
+
+WebGL with rasterized SVG as texture?
+  - Wondering how this would look compared to canvas drawing
+  - Would make effects like flipping the cards more straightforward (and probably look better)
+  - Good practice, if nothing else
