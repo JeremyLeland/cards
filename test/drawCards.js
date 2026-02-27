@@ -3,19 +3,25 @@ import * as Card from '../src/Card.js'
 const canvas = document.createElement( 'canvas' );
 document.body.appendChild( canvas );
 
-resizeCanvas( canvas, 2000, 1000 );
+resizeCanvas( canvas, Card.Width * 13, Card.Height * 4 );
 
 const ctx = canvas.getContext( '2d' );
 
 
 
-const cards = [
-  { x: 0,   y: 0,   rank: Card.Rank.Seven,  suit: Card.Suit.Clubs     },
-  { x: 120, y: 120, rank: Card.Rank.Three,  suit: Card.Suit.Hearts    },
-  { x: 240, y: 240, rank: Card.Rank.Ace,    suit: Card.Suit.Diamonds  },
-  { x: 360, y: 360, rank: Card.Rank.Queen,  suit: Card.Suit.Spades    },
-  { x: 480, y: 480, rank: Card.Rank.Jack,   suit: Card.Suit.Hearts    },
-];
+const cards = [];
+
+for ( let rank = 0; rank < Card.NumRanks; rank ++ ) {
+  for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
+    cards.push( {
+      x: rank * Card.Width,
+      y: suit * Card.Height,
+      rank: rank,
+      suit: suit,
+    } );
+  }
+}
+
 
 function draw() {
 

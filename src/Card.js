@@ -1,4 +1,5 @@
-export const Width = 200, Height = 300;
+export const Width = 100;
+export const Height = 1.5 * Width;
 
 export const Rank = {
   Ace:    0,
@@ -18,6 +19,8 @@ export const Rank = {
 
 const RankLabels = [ 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K' ];
 
+export const NumRanks = RankLabels.length;
+
 // English alphabetical order, for now
 export const Suit = {
   Clubs:     0,
@@ -28,132 +31,131 @@ export const Suit = {
 
 const SuitIcons = [ '♣️', '♦️', '♥️', '♠️' ];
 
+export const NumSuits = SuitIcons.length;
+
+const FontSize = Width / 5;
+
 const FaceIcons = [
   [ '🧛🏻‍♂️', '🧛🏼‍♂️', '🧛🏽‍♂️', '🧛🏿‍♂️' ],   // Jack
   [ '👸🏻', '👸🏼', '👸🏽', '👸🏿' ],   // Queen
   [ '🤴🏻', '🤴🏼', '🤴🏽', '🤴🏿' ],   // King
 ];
 
-const Card = {
-  FontSize: 40,
-
-  // TODO: Shorten this up: create new lists by adding to earlier lists?
-  Positions: [
-    // A
-    [
-      [ 0.5, 0.5 ],
-    ],
-
-    // 2
-    [
-      [ 0.5, 0.25 ],
-      [ 0.5, 0.75 ],
-    ],
-
-    // 3
-    [
-      [ 0.5, 0.25 ],
-      [ 0.5, 0.5 ],
-      [ 0.5, 0.75 ],
-    ],
-
-    // 4
-    [
-      [ 0.3, 0.25 ],
-      [ 0.7, 0.25 ],
-      [ 0.3, 0.75 ],
-      [ 0.7, 0.75 ],
-    ],
-
-    // 5
-    [
-      [ 0.3, 0.25 ],
-      [ 0.7, 0.25 ],
-      [ 0.5, 0.5 ],
-      [ 0.3, 0.75 ],
-      [ 0.7, 0.75 ],
-    ],
-
-    // 6
-    [
-      [ 0.3, 0.25 ],
-      [ 0.7, 0.25 ],
-      [ 0.3, 0.5 ],
-      [ 0.7, 0.5 ],
-      [ 0.3, 0.75 ],
-      [ 0.7, 0.75 ],
-    ],
-
-    // 7
-    [
-      [ 0.3, 0.25 ],
-      [ 0.7, 0.25 ],
-      [ 0.5, 0.375 ],
-      [ 0.3, 0.5 ],
-      [ 0.7, 0.5 ],
-      [ 0.3, 0.75 ],
-      [ 0.7, 0.75 ],
-    ],
-
-    // 8
-    [
-      [ 0.3, 0.25 ],
-      [ 0.7, 0.25 ],
-      [ 0.5, 0.375 ],
-      [ 0.3, 0.5 ],
-      [ 0.7, 0.5 ],
-      [ 0.5, 0.625 ],
-      [ 0.3, 0.75 ],
-      [ 0.7, 0.75 ],
-    ],
-
-    // 9
-    [
-      [ 0.3, 0.25 ],
-      [ 0.7, 0.25 ],
-      [ 0.3, 0.425 ],
-      [ 0.7, 0.425 ],
-      [ 0.5, 0.5 ],
-      [ 0.3, 0.575 ],
-      [ 0.7, 0.575 ],
-      [ 0.3, 0.75 ],
-      [ 0.7, 0.75 ],
-    ],
-
-    // 10
-    [
-      [ 0.3, 0.25 ],
-      [ 0.7, 0.25 ],
-      [ 0.5, 0.35 ],
-      [ 0.3, 0.425 ],
-      [ 0.7, 0.425 ],
-      [ 0.3, 0.575 ],
-      [ 0.7, 0.575 ],
-      [ 0.5, 0.65 ],
-      [ 0.3, 0.75 ],
-      [ 0.7, 0.75 ],
-    ],
-
-    // J
-    [
-      [ 0.5, 0.3 ],
-      [ 0.5, 0.7 ],
-    ],
-
-    // Q
-    [
-      [ 0.5, 0.3 ],
-      [ 0.5, 0.7 ],
-    ],
-
-    // K
-    [
-      [ 0.5, 0.3 ],
-      [ 0.5, 0.7 ],
-    ],
+// TODO: Shorten this up: create new lists by adding to earlier lists?
+const Positions = [
+  // A
+  [
+    [ 0.5, 0.5 ],
   ],
-  
-};
+
+  // 2
+  [
+    [ 0.5, 0.25 ],
+    [ 0.5, 0.75 ],
+  ],
+
+  // 3
+  [
+    [ 0.5, 0.25 ],
+    [ 0.5, 0.5 ],
+    [ 0.5, 0.75 ],
+  ],
+
+  // 4
+  [
+    [ 0.3, 0.25 ],
+    [ 0.7, 0.25 ],
+    [ 0.3, 0.75 ],
+    [ 0.7, 0.75 ],
+  ],
+
+  // 5
+  [
+    [ 0.3, 0.25 ],
+    [ 0.7, 0.25 ],
+    [ 0.5, 0.5 ],
+    [ 0.3, 0.75 ],
+    [ 0.7, 0.75 ],
+  ],
+
+  // 6
+  [
+    [ 0.3, 0.25 ],
+    [ 0.7, 0.25 ],
+    [ 0.3, 0.5 ],
+    [ 0.7, 0.5 ],
+    [ 0.3, 0.75 ],
+    [ 0.7, 0.75 ],
+  ],
+
+  // 7
+  [
+    [ 0.3, 0.25 ],
+    [ 0.7, 0.25 ],
+    [ 0.5, 0.375 ],
+    [ 0.3, 0.5 ],
+    [ 0.7, 0.5 ],
+    [ 0.3, 0.75 ],
+    [ 0.7, 0.75 ],
+  ],
+
+  // 8
+  [
+    [ 0.3, 0.25 ],
+    [ 0.7, 0.25 ],
+    [ 0.5, 0.375 ],
+    [ 0.3, 0.5 ],
+    [ 0.7, 0.5 ],
+    [ 0.5, 0.625 ],
+    [ 0.3, 0.75 ],
+    [ 0.7, 0.75 ],
+  ],
+
+  // 9
+  [
+    [ 0.3, 0.25 ],
+    [ 0.7, 0.25 ],
+    [ 0.3, 0.425 ],
+    [ 0.7, 0.425 ],
+    [ 0.5, 0.5 ],
+    [ 0.3, 0.575 ],
+    [ 0.7, 0.575 ],
+    [ 0.3, 0.75 ],
+    [ 0.7, 0.75 ],
+  ],
+
+  // 10
+  [
+    [ 0.3, 0.25 ],
+    [ 0.7, 0.25 ],
+    [ 0.5, 0.35 ],
+    [ 0.3, 0.425 ],
+    [ 0.7, 0.425 ],
+    [ 0.3, 0.575 ],
+    [ 0.7, 0.575 ],
+    [ 0.5, 0.65 ],
+    [ 0.3, 0.75 ],
+    [ 0.7, 0.75 ],
+  ],
+
+  // J
+  [
+    [ 0.5, 0.3 ],
+    [ 0.5, 0.7 ],
+  ],
+
+  // Q
+  [
+    [ 0.5, 0.3 ],
+    [ 0.5, 0.7 ],
+  ],
+
+  // K
+  [
+    [ 0.5, 0.3 ],
+    [ 0.5, 0.7 ],
+  ],
+];
 
 export function draw( ctx, rank, suit ) {
   ctx.fillStyle = 'white';
@@ -166,7 +168,7 @@ export function draw( ctx, rank, suit ) {
   ctx.stroke();
 
   ctx.fillStyle = suit == Suit.Clubs || suit == Suit.Spades ? 'black' : 'red';
-  ctx.font = `${ Card.FontSize }px Arial`;
+  ctx.font = `${ FontSize }px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
@@ -174,25 +176,25 @@ export function draw( ctx, rank, suit ) {
   const suitIcon = SuitIcons[ suit ];
   
   ctx.save(); {
-    ctx.translate( Card.FontSize / 2, Card.FontSize );
+    ctx.translate( FontSize / 2, FontSize );
     ctx.fillText( rankLabel, 0, 0 );
-    ctx.translate( 0, 0.75 * Card.FontSize );
+    ctx.translate( 0, 0.75 * FontSize );
     ctx.scale( 0.5, 0.5 );
     ctx.fillText( suitIcon, 0, 0 );
   }
   ctx.restore();
 
   ctx.save(); {
-    ctx.translate( Width - Card.FontSize / 2, Height - Card.FontSize );
+    ctx.translate( Width - FontSize / 2, Height - FontSize );
     ctx.rotate( Math.PI );
     ctx.fillText( rankLabel, 0, 0 );
-    ctx.translate( 0, 0.75 * Card.FontSize );
+    ctx.translate( 0, 0.75 * FontSize );
     ctx.scale( 0.5, 0.5 );
     ctx.fillText( suitIcon, 0, 0 );
   }
   ctx.restore();
 
-  Card.Positions[ rank ].forEach( pos => {
+  Positions[ rank ].forEach( pos => {
     ctx.save(); {
       ctx.translate( Width * pos[ 0 ], Height * pos[ 1 ] );
       
