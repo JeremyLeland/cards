@@ -1,3 +1,28 @@
+3/1:
+
+WebGL seems more complicated than it's worth for this project
+  - Texture size limits -- one large sprite sheet can't get high enough resolution for fine detail
+  - Lots of overhead to set up and draw
+  - Hard to believe it would be that much faster than drawImage() for my use case
+
+Got the SVG looking decent, I think
+  - Should probably make a head-to-head comparison to answer questions about visual fidelity and performance
+  - Make it so I can toggle between them
+    - Ideally, I would support doing either way anyway
+  - I like the simplicity of drawing things directly on canvas
+    - and not having to worry about rasterizing at a given resolution
+  - But being able to use SVGs other people have made would be way more flexible
+    - The face cards especially -- I'm not going to try to make something like this myself
+  - Could try making something that converts the SVG into canvas paths
+    - maybe should, just for kicks
+    - But how complicate is SVG? Seems like at that point, you should just use built in SVG renderer
+    - This way would avoid worrying about resolution, at least
+
+Directly drawing via canvas is still my favorite
+  - just in terms of feel and fun. The emjoi cards are kind of cute, and it feels clever to do this
+  - But it is pretty limiting, and harder to control precisely 
+    - different fonts on different systems, especially the emjois
+
 2/25/2026:
 
 Taking a break from the roads and intersections madness, want to play with some cards
