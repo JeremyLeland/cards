@@ -1,4 +1,4 @@
-export const Width = 100;
+export const Width = 150;
 export const Height = 1.5 * Width;
 
 export const Rank = {
