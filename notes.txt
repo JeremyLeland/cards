@@ -23,6 +23,19 @@ Directly drawing via canvas is still my favorite
   - But it is pretty limiting, and harder to control precisely 
     - different fonts on different systems, especially the emjois
 
+SVG notes
+  - The main benefit of the SVG I was using was for the face cards
+    - The face cards have lots of fine detail, like hair and clothing designs
+    - However, lots of this detail is lost or backfires when cards are smaller
+      - Aliasing effects with the lines close together for hair, for instance
+    - Not an issue with SVG in general, per se
+      - but a note that the fine details I was trying to use from other people's SVGs may not be worth it
+  - Also having issues with sizes and rounding
+
+NOW: Trying to make the rendered SVG match my desired card width/height
+  - My sizes are slightly off because I'm scaling based on the SVG "width"/"height"
+    - Instead of properly dictating size from my desired width/height
+
 2/25/2026:
 
 Taking a break from the roads and intersections madness, want to play with some cards
