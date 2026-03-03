@@ -1,3 +1,21 @@
+3/3:
+
+Collision detection
+  - For initial click, check against the waste and tableaus (similar to draw loop)
+  - As we move, check against foundations and tableaus for valid landing zones
+    - Draw to indicate this somehow, maybe translucent version of card snapped into position?
+  - When we release, either snap to new position (and move from old tableau)
+    - or return to original position
+
+Drawing
+  - Draw translucent version of active card wherever current move would end
+    - If no valid move yet, draw at old position
+    - If valid move, draw at new position
+  - Draw empty card outline (manually) at foundation positions
+  - Don't track face up/down for individual cards, we know it when drawing based on position
+    - Don't reveal new tableau card while active move in progress
+    - Add cheat mode to reveal all tableau cards for debugging?
+
 3/2:
 
 Made an example layout for Klondike style solitaire

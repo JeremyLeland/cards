@@ -49,6 +49,8 @@ const Positions = {
   Tableaus: [ 0, 1, 2, 3, 4, 5, 6 ].map( i => ( { x: HorizSpacing * i, y: VertSpacing } ) ),
 }
 
+let active;
+
 const board = {
   stock: [],
   waste: [],
@@ -112,6 +114,10 @@ function draw() {
       drawCard( ctx, card, HorizSpacing * tIndex, VertSpacing + TableauOffset.y * cIndex );
     } );
   } );
+
+  if ( active ) {
+    drawCard( ctx, active.card, active.pos.x, active.pos.y );
+  }
 }
 
 draw();
@@ -146,37 +152,68 @@ function resizeCanvas( canvas, width, height ) {
 // Input
 //
 
-let active;
-
 canvas.addEventListener( 'pointerdown', e => {
   // for this test, we are scrolling around large canvas, so we want pageX/Y
   const mx = e.pageX;
   const my = e.pageY;
 
-  cards.forEach( card => {
-    if ( card.pos.x <= mx && mx <= card.x + Card.Width &&
-         card.pos.y <= my && my <= card.y + Card.Height ) {
-      active = card;
-    }
-  } );
+  // TODO: Elegent way to avoid copying this below?
+  board.tableaus.find( ( tableau, tIndex ) => {
+    const left = HorizSpacing * tIndex;
+    const top = VertSpacing + TableauOffset.y * ( tableau.length - 1 );
+    const right = left + Card.Width;
+    const bottom = top + Card.Height;
 
-  cards.push( cards.splice( cards.indexOf( active ), 1 )[ 0 ] );
+    if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+      active = {
+        card: tableau.pop(),
+        oldStack: tableau,
+        newStack: null,
+        pos: { x: left, y: top },
+      }
+
+      return true;
+    };
+
+    return false;
+  } );
 
   draw();
 } );
 
-canvas.addEventListener( 'pointerup', e => {
-  active = null;
-} );
+function cancelActive( e ) {
 
-canvas.addEventListener( 'pointercancel', e => {
+  if ( active.newStack ) {
+    active.newStack.push( active.card );
+  }
+  else {
+    active.oldStack.push( active.card );
+  }
+  
   active = null;
-} );
+
+  draw();
+}
+
+canvas.addEventListener( 'pointerup', cancelActive );
+canvas.addEventListener( 'pointercancel', cancelActive );
 
 canvas.addEventListener( 'pointermove', e => {
   if ( active && e.buttons == 1 ) {
-    active.x += e.movementX;
-    active.y += e.movementY;
+    active.pos.x += e.movementX;
+    active.pos.y += e.movementY;
+
+    const mx = e.pageX;
+    const my = e.pageY;
+
+    active.newStack = board.tableaus.find( ( tableau, tIndex ) => {
+      const left = HorizSpacing * tIndex;
+      const top = VertSpacing + TableauOffset.y * ( tableau.length - 1 );
+      const right = left + Card.Width;
+      const bottom = top + Card.Height;
+
+      return left <= mx && mx <= right && top <= my && my <= bottom;
+    } );
 
     draw();
   }
