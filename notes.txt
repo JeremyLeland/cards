@@ -1,3 +1,25 @@
+3/2:
+
+Made an example layout for Klondike style solitaire
+  - Need to draw the empty Foundations spots
+  - Need to support face-down cards
+
+Will need to limit input
+  - Letting go of an active drag should reset the card to where it started
+    - Keep track of oldX and oldY as part of active? active = { card: card, oldX: int, oldY: int }?
+  - Should only be able to click on face-up cards
+  - Can we interact with foundations after we've dropped cards there?
+  - Clicking on stock should reveal card(s), but not make one active
+    - Kind of a waste to check location against 50 cards in the same spot
+
+Might make more sense to store cards (without location) in lists of deck, foundation, tableau, etc
+  - Only active will have a location?
+  - Will need to know what the top card is over various foundations and tableaus in order to know
+    - if we can drop a card there
+  - Instead of drawing all 52 cards, draw each section of board?
+    - stop storing location in card in that case
+    - take it as parameter to draw function
+
 3/1:
 
 WebGL seems more complicated than it's worth for this project
@@ -32,9 +54,15 @@ SVG notes
       - but a note that the fine details I was trying to use from other people's SVGs may not be worth it
   - Also having issues with sizes and rounding
 
-NOW: Trying to make the rendered SVG match my desired card width/height
+DONE: Trying to make the rendered SVG match my desired card width/height
   - My sizes are slightly off because I'm scaling based on the SVG "width"/"height"
     - Instead of properly dictating size from my desired width/height
+  - Got this working the way I want. Looks pretty good, actually.
+
+The SVG seems to look fine when done well.
+There isn't a noticeable performance difference on my main machine...
+  - but there's a very noticable difference on my old laptop
+  - SVG is pretty much instant, text/emoji stutters
 
 2/25/2026:
 

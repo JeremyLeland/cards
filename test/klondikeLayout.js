@@ -21,18 +21,25 @@ const cards = [];
 for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
   for ( let rank = 0; rank < Card.NumRanks; rank ++ ) {
     cards.push( {
-      x: 0,
-      y: 0,
+      // x: 0,
+      // y: 0,
       rank: rank,
       suit: suit,
     } );
   }
 }
 
+function getRandomCard() {
+  return cards.splice( Math.floor( Math.random() * cards.length ), 1 )[ 0 ];
+}
+
 const Gap = 20;
 const HorizSpacing = Card.Width + Gap;
 const VertSpacing = Card.Height + Gap;
-const TableauOffset = 30;
+
+const WasteOffset = { x: 30, y: 0 };
+const FoundationOffset = { x: 0, y: 0 };
+const TableauOffset = { x: 0, y: 30 };
 
 // https://en.wikipedia.org/wiki/Klondike_(solitaire)#Rules
 const Positions = {
@@ -42,25 +49,29 @@ const Positions = {
   Tableaus: [ 0, 1, 2, 3, 4, 5, 6 ].map( i => ( { x: HorizSpacing * i, y: VertSpacing } ) ),
 }
 
-let cardIndex = 0;
+const board = {
+  stock: [],
+  waste: [],
+  foundations: Array.from( Array( 4 ), _ => [] ),
+  tableaus:    Array.from( Array( 7 ), _ => [] ),
+}
 
-cards[ cardIndex ].x = Positions.Waste.x;
-cards[ cardIndex ].y = Positions.Waste.y;
-cardIndex ++;
+for ( let i = 0; i < 3; i ++ ) {
+  board.waste.push( getRandomCard() );
+}
 
-Positions.Foundations.forEach( foundationPos => {
-  cards[ cardIndex ].x = foundationPos.x;
-  cards[ cardIndex ].y = foundationPos.y;
-  cardIndex ++;
-} );
-
-Positions.Tableaus.forEach( ( tableauPos, index ) => {
-  for ( let i = 0; i <= index; i ++ ) {
-    cards[ cardIndex ].x = tableauPos.x;
-    cards[ cardIndex ].y = tableauPos.y + TableauOffset * i;
-    cardIndex ++;
+for ( let f = 0; f < 4; f ++ ) {
+  for ( let i = 0; i <= f; i ++ ) {
+    board.foundations[ f ].push( getRandomCard() );
   }
-} );
+}
+
+for ( let t = 0; t < 7; t ++ ) {
+  for ( let i = 0; i <= t; i ++ ) {
+    board.tableaus[ t ].push( getRandomCard() );
+  }
+}
+
 
 // Rasterize a larger version of SVG to use
 const scale = devicePixelRatio * Card.Width / imageCardWidth;
@@ -87,26 +98,41 @@ function draw() {
   ctx.fillStyle = '#123';
   ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
-  cards.forEach( card => {      
-    ctx.drawImage(
-      off,
+  board.waste.forEach( ( card, cIndex ) => {
+    drawCard( ctx, card, HorizSpacing + WasteOffset.x * cIndex, 0 );
+  } );
 
-      // source image is HiDPI
-      card.rank * Card.Width * devicePixelRatio,
-      card.suit * Card.Height * devicePixelRatio,
-      Card.Width * devicePixelRatio,
-      Card.Height * devicePixelRatio,
-      
-      // destination is screen location
-      card.x,
-      card.y,
-      Card.Width, 
-      Card.Height,
-    );
+  board.foundations.forEach( ( foundation, fIndex ) => {
+    // just draw top card
+    drawCard( ctx, foundation.at( -1 ), HorizSpacing * ( fIndex + 3 ), 0 );
+  } );
+
+  board.tableaus.forEach( ( tableau, tIndex ) => {
+    tableau.forEach( ( card, cIndex ) => {
+      drawCard( ctx, card, HorizSpacing * tIndex, VertSpacing + TableauOffset.y * cIndex );
+    } );
   } );
 }
 
 draw();
+
+function drawCard( ctx, card, x, y ) {
+  ctx.drawImage(
+    off,
+
+    // source image is HiDPI
+    card.rank * Card.Width * devicePixelRatio,
+    card.suit * Card.Height * devicePixelRatio,
+    Card.Width * devicePixelRatio,
+    Card.Height * devicePixelRatio,
+    
+    // destination is screen location
+    x,
+    y,
+    Card.Width, 
+    Card.Height,
+  );
+}
 
 function resizeCanvas( canvas, width, height ) {
   // HiDPI canvas needs larger image for same display size
