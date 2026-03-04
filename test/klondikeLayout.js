@@ -25,6 +25,7 @@ for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
       // y: 0,
       rank: rank,
       suit: suit,
+      faceup: false,
     } );
   }
 }
@@ -39,7 +40,7 @@ const VertSpacing = Card.Height + Gap;
 
 const WasteOffset = { x: 30, y: 0 };
 const FoundationOffset = { x: 0, y: 0 };
-const TableauOffset = { x: 0, y: 30 };
+const TableauOffset = { x: 0, y: 24 };
 
 // https://en.wikipedia.org/wiki/Klondike_(solitaire)#Rules
 const Positions = {
@@ -60,18 +61,21 @@ const board = {
 
 for ( let i = 0; i < 3; i ++ ) {
   board.waste.push( getRandomCard() );
+  board.waste[ i ].faceup = true;
 }
 
 for ( let f = 0; f < 4; f ++ ) {
   for ( let i = 0; i <= f; i ++ ) {
     board.foundations[ f ].push( getRandomCard() );
   }
+  board.foundations[ f ].at( -1 ).faceup = true;
 }
 
 for ( let t = 0; t < 7; t ++ ) {
   for ( let i = 0; i <= t; i ++ ) {
     board.tableaus[ t ].push( getRandomCard() );
   }
+  board.tableaus[ t ].at( -1 ).faceup = true;
 }
 
 
@@ -122,13 +126,18 @@ function draw() {
 
 draw();
 
+// If card is null, draw back
 function drawCard( ctx, card, x, y ) {
+
+  const srcCol = card.faceup ? card.rank : 2;
+  const srcRow = card.faceup ? card.suit : 4;
+
   ctx.drawImage(
     off,
 
     // source image is HiDPI
-    card.rank * Card.Width * devicePixelRatio,
-    card.suit * Card.Height * devicePixelRatio,
+    srcCol * Card.Width * devicePixelRatio,
+    srcRow * Card.Height * devicePixelRatio,
     Card.Width * devicePixelRatio,
     Card.Height * devicePixelRatio,
     
@@ -182,17 +191,22 @@ canvas.addEventListener( 'pointerdown', e => {
 } );
 
 function cancelActive( e ) {
-
-  if ( active.newStack ) {
-    active.newStack.push( active.card );
+  if ( active ) {
+    if ( active.newStack ) {
+      active.newStack.push( active.card );
+      
+      if ( active.oldStack.length > 0 ) {
+        active.oldStack.at( -1 ).faceup = true;
+      }
+    }
+    else {
+      active.oldStack.push( active.card );
+    }
+    
+    active = null;
+    
+    draw();
   }
-  else {
-    active.oldStack.push( active.card );
-  }
-  
-  active = null;
-
-  draw();
 }
 
 canvas.addEventListener( 'pointerup', cancelActive );
@@ -206,7 +220,14 @@ canvas.addEventListener( 'pointermove', e => {
     const mx = e.pageX;
     const my = e.pageY;
 
-    active.newStack = board.tableaus.find( ( tableau, tIndex ) => {
+    active.newStack = board.foundations.find ( ( foundation, fIndex ) => {
+      const left = HorizSpacing * ( fIndex + 3 );
+      const top = 0;
+      const right = left + Card.Width;
+      const bottom = top + Card.Height;
+
+      return left <= mx && mx <= right && top <= my && my <= bottom;
+    } ) ?? board.tableaus.find( ( tableau, tIndex ) => {
       const left = HorizSpacing * tIndex;
       const top = VertSpacing + TableauOffset.y * ( tableau.length - 1 );
       const right = left + Card.Width;
