@@ -93,7 +93,7 @@ offCtx.drawImage( image, 0, 0 );
 const canvas = document.createElement( 'canvas' );
 document.body.appendChild( canvas );
 
-resizeCanvas( canvas, HorizSpacing * 7, VertSpacing * 3 );
+resizeCanvas( canvas, HorizSpacing * 7, Math.round( VertSpacing * 3 ) );
 
 const ctx = canvas.getContext( '2d' );
 
@@ -167,7 +167,29 @@ canvas.addEventListener( 'pointerdown', e => {
   const my = e.pageY;
 
   // TODO: Elegent way to avoid copying this below?
+  // act on array of [ 'waste', 'tableau' ] and iterate into positions based on this?
+  if ( board.waste.length > 0 ) {
+    const left = HorizSpacing + WasteOffset.x * Math.min( 2, board.waste.length - 1 );
+    const top = 0;
+    const right = left + Card.Width;
+    const bottom = top + Card.Height;
+
+    if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+      active = {
+        card: board.waste.pop(),
+        oldStack: board.waste,
+        newStack: null,
+        pos: { x: left, y: top },
+      }
+    }
+  }
+
+  // TODO: This actually is more complicated. 
+  // Apparently I need to move the entire stack of cards above whichever faceup card I click on
+  // So this is going to need to change eventually
+
   board.tableaus.find( ( tableau, tIndex ) => {
+    // TODO: Use the values from Positions instead?
     const left = HorizSpacing * tIndex;
     const top = VertSpacing + TableauOffset.y * ( tableau.length - 1 );
     const right = left + Card.Width;

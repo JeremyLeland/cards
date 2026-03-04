@@ -1,3 +1,16 @@
+3/4:
+
+Things still seem kind of blurry with the SVG
+  - Try not to go too much down a rabbit hole on this
+  - You can go back to canvas drawn cards at some point to troubleshoot
+  - But for now, please just focus on making a playable game!
+
+Try to do tonight:
+  + Pull cards from waste
+  + Click deck to move cards to waste
+
+Visually, should we have offsets for deck and foundation to give a sense of how many cards are there?
+
 3/3:
 
 Collision detection
@@ -15,6 +28,18 @@ Drawing
   - Don't track face up/down for individual cards, we know it when drawing based on position
     - Don't reveal new tableau card while active move in progress
     - Add cheat mode to reveal all tableau cards for debugging?
+
+Tracked face up/down (turns out I do need this, if we're going to stack cards in tableau)
+Supported placing cards in foundation
+
+Still need translucent old/new markers
+
+Support pulling cards from waste
+Click on deck to put more cards in waste
+
+Need to check rules for if move is valid before allowing it
+  - Probably easier to support all the other input first
+    - Make sure I can drag everything around everywhere before I start limiting it with rules
 
 3/2:
 
