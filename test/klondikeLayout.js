@@ -15,25 +15,6 @@ const imageCardHeight = image.height / ( Card.NumSuits + 1 );   // additional li
 
 Card.Height = Card.Width * imageCardHeight / imageCardWidth;
 
-// Klondike layout
-const cards = [];
-
-for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
-  for ( let rank = 0; rank < Card.NumRanks; rank ++ ) {
-    cards.push( {
-      // x: 0,
-      // y: 0,
-      rank: rank,
-      suit: suit,
-      faceup: false,
-    } );
-  }
-}
-
-// TODO: Shuffle deck once then "deal" out in order (instead of calling this function a bunch)
-function removeRandomCard() {
-  return cards.splice( Math.floor( Math.random() * cards.length ), 1 )[ 0 ];
-}
 
 const Gap = 20;
 const HorizSpacing = Card.Width + Gap;
@@ -74,21 +55,27 @@ function deal() {
   }
 }
 
-// for ( let f = 0; f < 4; f ++ ) {
-//   for ( let i = 0; i <= f; i ++ ) {
-//     board.foundations[ f ].push( removeRandomCard() );
-//   }
-//   board.foundations[ f ].at( -1 ).faceup = true;
-// }
+// Add all possible cards to stock, then shuffle
+for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
+  for ( let rank = 0; rank < Card.NumRanks; rank ++ ) {
+    board.stock.push( {
+      rank: rank,
+      suit: suit,
+      faceup: false,
+    } );
+  }
+}
+
+// Shuffle deck
+board.stock.sort( ( a, b ) => Math.random() - 0.5 );
 
 for ( let t = 0; t < 7; t ++ ) {
   for ( let i = 0; i <= t; i ++ ) {
-    board.tableaus[ t ].push( removeRandomCard() );
+    board.tableaus[ t ].push( board.stock.pop() );
   }
   board.tableaus[ t ].at( -1 ).faceup = true;
 }
 
-board.stock = cards;  // put rest of cards in stock
 
 
 // Rasterize a larger version of SVG to use
@@ -271,9 +258,6 @@ canvas.addEventListener( 'pointerdown', e => {
 
   // TODO: Can also bring down top card from foundation
 
-  // TODO: This actually is more complicated. 
-  // Apparently I need to move the entire stack of cards above whichever faceup card I click on
-  // So this is going to need to change eventually
 
   board.tableaus.find( ( tableau, tIndex ) => {
 
