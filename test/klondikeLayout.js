@@ -120,10 +120,7 @@ function draw() {
     drawCard( ctx, board.stock.at( -1 ), 0, 0 );
   }
   else {
-    ctx.beginPath();
-    ctx.roundRect( 0, 0, Card.Width, Card.Height, 4 );
-    ctx.strokeStyle = 'white';
-    ctx.stroke();
+    drawCardOutline( ctx, 0, 0 );
   }
 
   // Draw the top 3 cards of the waste (or as many as we have)
@@ -139,10 +136,7 @@ function draw() {
     }
   }
   else {
-    ctx.beginPath();
-    ctx.roundRect( HorizSpacing, 0, Card.Width, Card.Height, 4 );
-    ctx.strokeStyle = 'white';
-    ctx.stroke();
+    drawCardOutline( ctx, HorizSpacing, 0 );
   }
 
   board.foundations.forEach( ( foundation, fIndex ) => {
@@ -151,10 +145,7 @@ function draw() {
       drawCard( ctx, foundation.at( -1 ), HorizSpacing * ( fIndex + 3 ), 0 );
     }
     else {
-      ctx.beginPath();
-      ctx.roundRect( HorizSpacing * ( fIndex + 3 ), 0, Card.Width, Card.Height, 4 );
-      ctx.strokeStyle = 'white';
-      ctx.stroke();
+      drawCardOutline( ctx, HorizSpacing * ( fIndex + 3 ), 0 );
     }
   } );
 
@@ -169,6 +160,13 @@ function draw() {
   if ( active ) {
     drawCard( ctx, active.card, active.pos.x, active.pos.y );
   }
+}
+
+function drawCardOutline( ctx, x, y ) {
+  ctx.beginPath();
+  ctx.roundRect( x, y, Card.Width, Card.Height, 5 );
+  ctx.strokeStyle = 'white';
+  ctx.stroke();
 }
 
 draw();
