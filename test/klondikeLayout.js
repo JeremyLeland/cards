@@ -30,7 +30,8 @@ for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
   }
 }
 
-function getRandomCard() {
+// TODO: Shuffle deck once then "deal" out in order (instead of calling this function a bunch)
+function removeRandomCard() {
   return cards.splice( Math.floor( Math.random() * cards.length ), 1 )[ 0 ];
 }
 
@@ -59,24 +60,34 @@ const board = {
   tableaus:    Array.from( Array( 7 ), _ => [] ),
 }
 
-for ( let i = 0; i < 3; i ++ ) {
-  board.waste.push( getRandomCard() );
-  board.waste[ i ].faceup = true;
+function deal() {
+  for ( let i = 0; i < 3; i ++ ) {
+    const card = removeRandomCard();
+    card.faceup = true;
+
+    // TODO: Some sort of "turn" animation here? maybe faceup has a timer for turn progress?
+
+    board.waste.push( card );
+  }
 }
+
+deal();
 
 for ( let f = 0; f < 4; f ++ ) {
   for ( let i = 0; i <= f; i ++ ) {
-    board.foundations[ f ].push( getRandomCard() );
+    board.foundations[ f ].push( removeRandomCard() );
   }
   board.foundations[ f ].at( -1 ).faceup = true;
 }
 
 for ( let t = 0; t < 7; t ++ ) {
   for ( let i = 0; i <= t; i ++ ) {
-    board.tableaus[ t ].push( getRandomCard() );
+    board.tableaus[ t ].push( removeRandomCard() );
   }
   board.tableaus[ t ].at( -1 ).faceup = true;
 }
+
+board.stock = cards;  // put rest of cards in stock
 
 
 // Rasterize a larger version of SVG to use
@@ -104,9 +115,20 @@ function draw() {
   ctx.fillStyle = '#123';
   ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
-  board.waste.forEach( ( card, cIndex ) => {
-    drawCard( ctx, card, HorizSpacing + WasteOffset.x * cIndex, 0 );
-  } );
+  if ( board.stock.length > 0 ) {
+    drawCard( ctx, board.stock.at( -1 ), 0, 0 );
+  }
+
+  // Draw the top 3 cards of the waste (or as many as we have)
+  const wasteStartIndex = Math.max( 0, board.waste.length - 3 );
+  const wasteDrawSize = Math.min( 3, board.waste.length );
+  for ( let i = 0; i < wasteDrawSize; i ++ ) {
+    const card = board.waste[ wasteStartIndex + i ];
+
+    if ( card != active?.card ) {
+      drawCard( ctx, card, HorizSpacing + WasteOffset.x * i, 0 );
+    }
+  }
 
   board.foundations.forEach( ( foundation, fIndex ) => {
     // just draw top card
@@ -115,7 +137,9 @@ function draw() {
 
   board.tableaus.forEach( ( tableau, tIndex ) => {
     tableau.forEach( ( card, cIndex ) => {
-      drawCard( ctx, card, HorizSpacing * tIndex, VertSpacing + TableauOffset.y * cIndex );
+      if ( card != active?.card ) {
+        drawCard( ctx, card, HorizSpacing * tIndex, VertSpacing + TableauOffset.y * cIndex );
+      }
     } );
   } );
 
@@ -166,6 +190,12 @@ canvas.addEventListener( 'pointerdown', e => {
   const mx = e.pageX;
   const my = e.pageY;
 
+  if ( board.stock.length > 0 ) {
+    if ( 0 <= mx && mx <= Card.Width && 0 <= my && my <= Card.Height ) {
+      deal();
+    }
+  }
+
   // TODO: Elegent way to avoid copying this below?
   // act on array of [ 'waste', 'tableau' ] and iterate into positions based on this?
   if ( board.waste.length > 0 ) {
@@ -176,13 +206,15 @@ canvas.addEventListener( 'pointerdown', e => {
 
     if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
       active = {
-        card: board.waste.pop(),
+        card: board.waste.at( -1 ),
         oldStack: board.waste,
         newStack: null,
         pos: { x: left, y: top },
       }
     }
   }
+
+  // TODO: Can also bring down top card from foundation
 
   // TODO: This actually is more complicated. 
   // Apparently I need to move the entire stack of cards above whichever faceup card I click on
@@ -197,7 +229,7 @@ canvas.addEventListener( 'pointerdown', e => {
 
     if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
       active = {
-        card: tableau.pop(),
+        card: tableau.at( -1 ),
         oldStack: tableau,
         newStack: null,
         pos: { x: left, y: top },
@@ -215,15 +247,16 @@ canvas.addEventListener( 'pointerdown', e => {
 function cancelActive( e ) {
   if ( active ) {
     if ( active.newStack ) {
+      active.oldStack.pop();
       active.newStack.push( active.card );
       
       if ( active.oldStack.length > 0 ) {
         active.oldStack.at( -1 ).faceup = true;
       }
     }
-    else {
-      active.oldStack.push( active.card );
-    }
+    // else {
+    //   active.oldStack.push( active.card );
+    // }
     
     active = null;
     
