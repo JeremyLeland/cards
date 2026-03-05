@@ -6,8 +6,9 @@ Things still seem kind of blurry with the SVG
   - But for now, please just focus on making a playable game!
 
 Try to do tonight:
-  + Pull cards from waste
-  + Click deck to move cards to waste
+  + DONE: Pull cards from waste
+  + DONE: Click deck to move cards to waste
+    - DONE: Still need to pull cards from waste back into stock when stock is empty
 
 Visually, should we have offsets for deck and foundation to give a sense of how many cards are there?
 

@@ -62,23 +62,24 @@ const board = {
 
 function deal() {
   for ( let i = 0; i < 3; i ++ ) {
-    const card = removeRandomCard();
-    card.faceup = true;
+    const card = board.stock.pop();
 
-    // TODO: Some sort of "turn" animation here? maybe faceup has a timer for turn progress?
-
-    board.waste.push( card );
+    if ( card ) {
+      card.faceup = true;
+      
+      // TODO: Some sort of "turn" animation here? maybe faceup has a timer for turn progress?
+      
+      board.waste.push( card );
+    }
   }
 }
 
-deal();
-
-for ( let f = 0; f < 4; f ++ ) {
-  for ( let i = 0; i <= f; i ++ ) {
-    board.foundations[ f ].push( removeRandomCard() );
-  }
-  board.foundations[ f ].at( -1 ).faceup = true;
-}
+// for ( let f = 0; f < 4; f ++ ) {
+//   for ( let i = 0; i <= f; i ++ ) {
+//     board.foundations[ f ].push( removeRandomCard() );
+//   }
+//   board.foundations[ f ].at( -1 ).faceup = true;
+// }
 
 for ( let t = 0; t < 7; t ++ ) {
   for ( let i = 0; i <= t; i ++ ) {
@@ -118,21 +119,43 @@ function draw() {
   if ( board.stock.length > 0 ) {
     drawCard( ctx, board.stock.at( -1 ), 0, 0 );
   }
+  else {
+    ctx.beginPath();
+    ctx.roundRect( 0, 0, Card.Width, Card.Height, 4 );
+    ctx.strokeStyle = 'white';
+    ctx.stroke();
+  }
 
   // Draw the top 3 cards of the waste (or as many as we have)
-  const wasteStartIndex = Math.max( 0, board.waste.length - 3 );
-  const wasteDrawSize = Math.min( 3, board.waste.length );
-  for ( let i = 0; i < wasteDrawSize; i ++ ) {
-    const card = board.waste[ wasteStartIndex + i ];
+  if ( board.waste.length > 0 ) {
+    const wasteStartIndex = Math.max( 0, board.waste.length - 3 );
+    const wasteDrawSize = Math.min( 3, board.waste.length );
+    for ( let i = 0; i < wasteDrawSize; i ++ ) {
+      const card = board.waste[ wasteStartIndex + i ];
 
-    if ( card != active?.card ) {
-      drawCard( ctx, card, HorizSpacing + WasteOffset.x * i, 0 );
+      if ( card != active?.card ) {
+        drawCard( ctx, card, HorizSpacing + WasteOffset.x * i, 0 );
+      }
     }
+  }
+  else {
+    ctx.beginPath();
+    ctx.roundRect( HorizSpacing, 0, Card.Width, Card.Height, 4 );
+    ctx.strokeStyle = 'white';
+    ctx.stroke();
   }
 
   board.foundations.forEach( ( foundation, fIndex ) => {
     // just draw top card
-    drawCard( ctx, foundation.at( -1 ), HorizSpacing * ( fIndex + 3 ), 0 );
+    if ( foundation.length > 0 ) {
+      drawCard( ctx, foundation.at( -1 ), HorizSpacing * ( fIndex + 3 ), 0 );
+    }
+    else {
+      ctx.beginPath();
+      ctx.roundRect( HorizSpacing * ( fIndex + 3 ), 0, Card.Width, Card.Height, 4 );
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+    }
   } );
 
   board.tableaus.forEach( ( tableau, tIndex ) => {
@@ -190,9 +213,17 @@ canvas.addEventListener( 'pointerdown', e => {
   const mx = e.pageX;
   const my = e.pageY;
 
-  if ( board.stock.length > 0 ) {
-    if ( 0 <= mx && mx <= Card.Width && 0 <= my && my <= Card.Height ) {
+  // Stock
+  if ( 0 <= mx && mx <= Card.Width && 0 <= my && my <= Card.Height ) {
+    if ( board.stock.length > 0 ) {
       deal();
+    }
+    else {
+      while ( board.waste.length > 0 ) {
+        const card = board.waste.pop();
+        card.faceup = false;
+        board.stock.push( card );
+      }
     }
   }
 
