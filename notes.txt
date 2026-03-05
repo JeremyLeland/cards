@@ -1,3 +1,8 @@
+3/5:
+Changing active to use startIndex instead of card (to support multiple cards from tableau)
+  - Fix input
+  - Fix drawing
+
 3/4:
 
 Things still seem kind of blurry with the SVG
@@ -11,6 +16,12 @@ Try to do tonight:
     - DONE: Still need to pull cards from waste back into stock when stock is empty
 
 Visually, should we have offsets for deck and foundation to give a sense of how many cards are there?
+  - Eh, no one else seems to
+
+NEXT: Support moving multiple cards from tableaus
+  - Make active.card be an array (always? just in this case?)
+  - Draw multiple cards with appropriate offsets if active.card is an array
+THEN: Make sure move is valid before letting a card move
 
 3/3:
 

@@ -124,41 +124,66 @@ function draw() {
   }
 
   // Draw the top 3 cards of the waste (or as many as we have)
+  drawCardOutline( ctx, HorizSpacing, 0 );
+
   if ( board.waste.length > 0 ) {
     const wasteStartIndex = Math.max( 0, board.waste.length - 3 );
     const wasteDrawSize = Math.min( 3, board.waste.length );
-    for ( let i = 0; i < wasteDrawSize; i ++ ) {
-      const card = board.waste[ wasteStartIndex + i ];
 
-      if ( card != active?.card ) {
-        drawCard( ctx, card, HorizSpacing + WasteOffset.x * i, 0 );
+    for ( let cIndex = 0; cIndex < wasteDrawSize; cIndex ++ ) {
+      const wasteCardIndex = wasteStartIndex + cIndex;
+
+      if ( board.waste == active?.oldStack && wasteCardIndex == active.oldStartIndex ) {
+        break;
       }
+
+      drawCard(
+        ctx, 
+        board.waste[ wasteCardIndex ], 
+        HorizSpacing + WasteOffset.x * cIndex, 
+        0 
+      );
     }
-  }
-  else {
-    drawCardOutline( ctx, HorizSpacing, 0 );
   }
 
   board.foundations.forEach( ( foundation, fIndex ) => {
+    drawCardOutline( ctx, HorizSpacing * ( fIndex + 3 ), 0 );
+
     // just draw top card
     if ( foundation.length > 0 ) {
-      drawCard( ctx, foundation.at( -1 ), HorizSpacing * ( fIndex + 3 ), 0 );
-    }
-    else {
-      drawCardOutline( ctx, HorizSpacing * ( fIndex + 3 ), 0 );
+      drawCard( 
+        ctx, 
+        foundation.at( -1 ), 
+        HorizSpacing * ( fIndex + 3 ), 
+        0 
+      );
     }
   } );
 
   board.tableaus.forEach( ( tableau, tIndex ) => {
-    tableau.forEach( ( card, cIndex ) => {
-      if ( card != active?.card ) {
-        drawCard( ctx, card, HorizSpacing * tIndex, VertSpacing + TableauOffset.y * cIndex );
+    for ( let cIndex = 0; cIndex < tableau.length; cIndex ++ ) {
+      if ( tableau == active?.oldStack && cIndex == active.oldStartIndex ) {
+        break;
       }
-    } );
+
+      drawCard( 
+        ctx, 
+        tableau[ cIndex ], 
+        HorizSpacing * tIndex, 
+        VertSpacing + TableauOffset.y * cIndex 
+      );
+    }
   } );
 
   if ( active ) {
-    drawCard( ctx, active.card, active.pos.x, active.pos.y );
+    for ( let cIndex = active.oldStartIndex; cIndex < active.oldStack.length; cIndex ++ ) {
+      drawCard(
+        ctx, 
+        active.oldStack[ cIndex ], 
+        active.pos.x, 
+        active.pos.y + TableauOffset.y * ( cIndex - active.oldStartIndex )
+      );
+    }
   }
 }
 
@@ -235,8 +260,9 @@ canvas.addEventListener( 'pointerdown', e => {
 
     if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
       active = {
-        card: board.waste.at( -1 ),
+        // card: board.waste.at( -1 ),
         oldStack: board.waste,
+        oldStartIndex: board.waste.length - 1,
         newStack: null,
         pos: { x: left, y: top },
       }
@@ -250,24 +276,27 @@ canvas.addEventListener( 'pointerdown', e => {
   // So this is going to need to change eventually
 
   board.tableaus.find( ( tableau, tIndex ) => {
-    // TODO: Use the values from Positions instead?
-    const left = HorizSpacing * tIndex;
-    const top = VertSpacing + TableauOffset.y * ( tableau.length - 1 );
-    const right = left + Card.Width;
-    const bottom = top + Card.Height;
 
-    if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
-      active = {
-        card: tableau.at( -1 ),
-        oldStack: tableau,
-        newStack: null,
-        pos: { x: left, y: top },
-      }
+    // Start with top-most cards so we don't accidently match something lower down the stack
+    for ( let cIndex = tableau.length - 1; cIndex >= 0; cIndex -- ) {
+      // TODO: Use the values from Positions instead?
+      const left = HorizSpacing * tIndex;
+      const top = VertSpacing + TableauOffset.y * cIndex;
+      const right = left + Card.Width;
+      const bottom = top + Card.Height;
 
-      return true;
-    };
+      if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+        active = {
+          // card: card,
+          oldStack: tableau,
+          oldStartIndex: cIndex,
+          newStack: null,
+          pos: { x: left, y: top },
+        }
 
-    return false;
+        break;
+      };
+    }
   } );
 
   draw();
@@ -275,9 +304,8 @@ canvas.addEventListener( 'pointerdown', e => {
 
 function cancelActive( e ) {
   if ( active ) {
-    if ( active.newStack ) {
-      active.oldStack.pop();
-      active.newStack.push( active.card );
+    if ( active.newStack && active.oldStack != active.newStack ) {
+      active.newStack.splice( active.newStack.length, 0, ...active.oldStack.splice( active.oldStartIndex ) );
       
       if ( active.oldStack.length > 0 ) {
         active.oldStack.at( -1 ).faceup = true;
