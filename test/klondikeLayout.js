@@ -41,20 +41,6 @@ const board = {
   tableaus:    Array.from( Array( 7 ), _ => [] ),
 }
 
-function deal() {
-  for ( let i = 0; i < 3; i ++ ) {
-    const card = board.stock.pop();
-
-    if ( card ) {
-      card.faceup = true;
-      
-      // TODO: Some sort of "turn" animation here? maybe faceup has a timer for turn progress?
-      
-      board.waste.push( card );
-    }
-  }
-}
-
 // Add all possible cards to stock, then shuffle
 for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
   for ( let rank = 0; rank < Card.NumRanks; rank ++ ) {
@@ -67,6 +53,7 @@ for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
 }
 
 // Shuffle deck
+// TODO: More thorough shuffle? (or just do this a few more times)
 board.stock.sort( ( a, b ) => Math.random() - 0.5 );
 
 for ( let t = 0; t < 7; t ++ ) {
@@ -125,10 +112,10 @@ function draw() {
       }
 
       drawCard(
-        ctx, 
-        board.waste[ wasteCardIndex ], 
-        HorizSpacing + WasteOffset.x * cIndex, 
-        0 
+        ctx,
+        board.waste[ wasteCardIndex ],
+        HorizSpacing + WasteOffset.x * cIndex,
+        0
       );
     }
   }
@@ -138,11 +125,11 @@ function draw() {
 
     // just draw top card
     if ( foundation.length > 0 ) {
-      drawCard( 
-        ctx, 
-        foundation.at( -1 ), 
-        HorizSpacing * ( fIndex + 3 ), 
-        0 
+      drawCard(
+        ctx,
+        foundation.at( -1 ),
+        HorizSpacing * ( fIndex + 3 ),
+        0
       );
     }
   } );
@@ -153,11 +140,11 @@ function draw() {
         break;
       }
 
-      drawCard( 
-        ctx, 
-        tableau[ cIndex ], 
-        HorizSpacing * tIndex, 
-        VertSpacing + TableauOffset.y * cIndex 
+      drawCard(
+        ctx,
+        tableau[ cIndex ],
+        HorizSpacing * tIndex,
+        VertSpacing + TableauOffset.y * cIndex
       );
     }
   } );
@@ -165,9 +152,9 @@ function draw() {
   if ( active ) {
     for ( let cIndex = active.oldStartIndex; cIndex < active.oldStack.length; cIndex ++ ) {
       drawCard(
-        ctx, 
-        active.oldStack[ cIndex ], 
-        active.pos.x, 
+        ctx,
+        active.oldStack[ cIndex ],
+        active.pos.x,
         active.pos.y + TableauOffset.y * ( cIndex - active.oldStartIndex )
       );
     }
@@ -197,20 +184,20 @@ function drawCard( ctx, card, x, y ) {
     srcRow * Card.Height * devicePixelRatio,
     Card.Width * devicePixelRatio,
     Card.Height * devicePixelRatio,
-    
+
     // destination is screen location
     x,
     y,
-    Card.Width, 
+    Card.Width,
     Card.Height,
   );
 }
 
 function resizeCanvas( canvas, width, height ) {
   // HiDPI canvas needs larger image for same display size
-  canvas.style.width = width + 'px'; 
-  canvas.style.height = height + 'px'; 
-  canvas.width = width * devicePixelRatio; 
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  canvas.width = width * devicePixelRatio;
   canvas.height = height * devicePixelRatio;
 }
 
@@ -226,7 +213,13 @@ canvas.addEventListener( 'pointerdown', e => {
   // Stock
   if ( 0 <= mx && mx <= Card.Width && 0 <= my && my <= Card.Height ) {
     if ( board.stock.length > 0 ) {
-      deal();
+      for ( let i = 0; i < 3 && i < board.stock.length; i ++ ) {
+        const card = board.stock.pop();
+        card.faceup = true;
+        board.waste.push( card );
+
+        // TODO: Some sort of "turn" animation here? maybe faceup has a timer for turn progress?
+      }
     }
     else {
       while ( board.waste.length > 0 ) {
@@ -290,17 +283,14 @@ function cancelActive( e ) {
   if ( active ) {
     if ( active.newStack && active.oldStack != active.newStack ) {
       active.newStack.splice( active.newStack.length, 0, ...active.oldStack.splice( active.oldStartIndex ) );
-      
+
       if ( active.oldStack.length > 0 ) {
         active.oldStack.at( -1 ).faceup = true;
       }
     }
-    // else {
-    //   active.oldStack.push( active.card );
-    // }
-    
+
     active = null;
-    
+
     draw();
   }
 }
