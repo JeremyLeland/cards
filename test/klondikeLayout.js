@@ -130,16 +130,20 @@ function draw() {
   }
 
   board.foundations.forEach( ( foundation, fIndex ) => {
-    drawCardOutline( ctx, HorizSpacing * ( fIndex + 3 ), 0 );
+    drawCardOutline( ctx, Positions.Foundations[ fIndex ].x, Positions.Foundations[ fIndex ].y );
 
     // just draw top card
     if ( foundation.length > 0 ) {
-      drawCard(
-        ctx,
-        foundation.at( -1 ),
-        HorizSpacing * ( fIndex + 3 ),
-        0
-      );
+      const topCard = foundation == active?.oldStack ? foundation.at( -2 ) : foundation.at( -1 );
+
+      if ( topCard ) {
+        drawCard( 
+          ctx, 
+          topCard, 
+          Positions.Foundations[ fIndex ].x, 
+          Positions.Foundations[ fIndex ].y,
+        );
+      }
     }
   } );
 
@@ -152,8 +156,8 @@ function draw() {
       drawCard(
         ctx,
         tableau[ cIndex ],
-        HorizSpacing * tIndex,
-        VertSpacing + TableauOffset.y * cIndex
+        Positions.Tableaus[ tIndex ].x,
+        Positions.Tableaus[ tIndex ].y + TableauOffset.y * cIndex,
       );
     }
   } );
@@ -239,17 +243,17 @@ canvas.addEventListener( 'pointerdown', e => {
     }
   }
 
+  // Waste
   // TODO: Elegent way to avoid copying this below?
   // act on array of [ 'waste', 'tableau' ] and iterate into positions based on this?
   if ( board.waste.length > 0 ) {
     const left = HorizSpacing + WasteOffset.x * Math.min( 2, board.waste.length - 1 );
-    const top = 0;
+    const top  = 0;
     const right = left + Card.Width;
     const bottom = top + Card.Height;
 
     if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
       active = {
-        // card: board.waste.at( -1 ),
         oldStack: board.waste,
         oldStartIndex: board.waste.length - 1,
         newStack: null,
@@ -258,31 +262,52 @@ canvas.addEventListener( 'pointerdown', e => {
     }
   }
 
-  // TODO: Can also bring down top card from foundation
+  // Foundation
+  board.foundations.find( ( foundation, fIndex ) => {
+    const left = Positions.Foundations[ fIndex ].x;
+    const top  = Positions.Foundations[ fIndex ].y
+    const right = left + Card.Width;
+    const bottom = top + Card.Height;
 
+    if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+      active = {
+        oldStack: foundation,
+        oldStartIndex: foundation.length - 1,
+        newStack: null,
+        pos: { x: left, y: top },
+      }
 
+      return true;
+    };
+
+    return false;
+  } );
+
+  // Tableau
   board.tableaus.find( ( tableau, tIndex ) => {
 
     // Start with top-most cards so we don't accidently match something lower down the stack
     for ( let cIndex = tableau.length - 1; cIndex >= 0; cIndex -- ) {
       // TODO: Use the values from Positions instead?
-      const left = HorizSpacing * tIndex;
-      const top = VertSpacing + TableauOffset.y * cIndex;
+      const left = Positions.Tableaus[ tIndex ].x;
+      const top  = Positions.Tableaus[ tIndex ].y + TableauOffset.y * cIndex;
       const right = left + Card.Width;
       const bottom = top + Card.Height;
 
       if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
         active = {
-          // card: card,
           oldStack: tableau,
           oldStartIndex: cIndex,
           newStack: null,
           pos: { x: left, y: top },
         }
 
-        break;
+        // break;
+        return true;
       };
     }
+
+    return false;
   } );
 
   draw();
@@ -373,15 +398,15 @@ canvas.addEventListener( 'pointermove', e => {
     const my = e.pageY;
 
     active.newStack = board.foundations.find ( ( foundation, fIndex ) => {
-      const left = HorizSpacing * ( fIndex + 3 );
-      const top = 0;
+      const left = Positions.Foundations[ fIndex ].x;
+      const top  = Positions.Foundations[ fIndex ].y;
       const right = left + Card.Width;
       const bottom = top + Card.Height;
 
       return left <= mx && mx <= right && top <= my && my <= bottom;
     } ) ?? board.tableaus.find( ( tableau, tIndex ) => {
-      const left = HorizSpacing * tIndex;
-      const top = VertSpacing + TableauOffset.y * ( tableau.length - 1 );
+      const left = Positions.Tableaus[ tIndex ].x;
+      const top  = Positions.Tableaus[ tIndex ].y + TableauOffset.y * ( tableau.length - 1 );
       const right = left + Card.Width;
       const bottom = top + Card.Height;
 
