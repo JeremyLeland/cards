@@ -226,8 +226,13 @@ canvas.addEventListener( 'pointerdown', e => {
   // Stock
   if ( 0 <= mx && mx <= Card.Width && 0 <= my && my <= Card.Height ) {
     if ( board.stock.length > 0 ) {
-      for ( let i = 0; i < 3 && i < board.stock.length; i ++ ) {
+      for ( let i = 0; i < 3; i ++ ) {
         const card = board.stock.pop();
+
+        if ( !card ) {
+          break;
+        }
+        
         card.faceup = true;
         board.waste.push( card );
 
@@ -288,6 +293,10 @@ canvas.addEventListener( 'pointerdown', e => {
 
     // Start with top-most cards so we don't accidently match something lower down the stack
     for ( let cIndex = tableau.length - 1; cIndex >= 0; cIndex -- ) {
+      if ( !tableau[ cIndex ].faceup ) {
+        break;
+      }
+
       // TODO: Use the values from Positions instead?
       const left = Positions.Tableaus[ tIndex ].x;
       const top  = Positions.Tableaus[ tIndex ].y + TableauOffset.y * cIndex;
