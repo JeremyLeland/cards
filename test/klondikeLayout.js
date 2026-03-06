@@ -52,10 +52,18 @@ for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
   }
 }
 
-// Shuffle deck
-// TODO: More thorough shuffle? (or just do this a few more times)
-board.stock.sort( ( a, b ) => Math.random() - 0.5 );
+// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+function shuffle( array ) {
+  for ( let i = array.length - 1; i > 0; i-- ) {
+    const j = Math.floor( Math.random() * ( i + 1 ) );
+    [ array[ i ], array[ j ] ] = [ array[ j ], array[ i ] ];
+  }
+  return array;
+}
 
+shuffle( board.stock );
+
+// Deal out tableaus
 for ( let t = 0; t < 7; t ++ ) {
   for ( let i = 0; i <= t; i ++ ) {
     board.tableaus[ t ].push( board.stock.pop() );
@@ -77,9 +85,10 @@ offCtx.drawImage( image, 0, 0 );
 
 // Prepare canvas
 const canvas = document.createElement( 'canvas' );
+canvas.oncontextmenu = () => { return false };
 document.body.appendChild( canvas );
 
-resizeCanvas( canvas, HorizSpacing * 7, Math.round( VertSpacing * 3 ) );
+resizeCanvas( canvas, HorizSpacing * 7, Math.round( VertSpacing * 4 ) );
 
 const ctx = canvas.getContext( '2d' );
 
@@ -279,20 +288,77 @@ canvas.addEventListener( 'pointerdown', e => {
   draw();
 } );
 
-function cancelActive( e ) {
-  if ( active ) {
-    if ( active.newStack && active.oldStack != active.newStack ) {
-      active.newStack.splice( active.newStack.length, 0, ...active.oldStack.splice( active.oldStartIndex ) );
+function validateMove() {
+  if ( !active ) {
+    return false;
+  }
 
-      if ( active.oldStack.length > 0 ) {
-        active.oldStack.at( -1 ).faceup = true;
+  if ( !active.newStack || active.oldStack == active.newStack ) {
+    return false;
+  }
+
+  const card = active.oldStack[ active.oldStartIndex ];
+
+  // Foundation
+  if ( board.foundations.indexOf( active.newStack ) != -1 ) {
+
+    // Can only put move one card at a time in foundation
+    // (stacks are always decreasing and alternate suits, so can never be valid)
+    if ( active.oldStartIndex < active.oldStack.length - 1 ) {
+      return false;
+    }
+
+    if ( active.newStack.length != card.rank ) {
+      return false;
+    }
+
+    if ( active.newStack.length > 0 && card.suit != active.newStack[ 0 ].suit ) {
+      return false;
+    }
+  }
+
+  // Tableau
+  else if ( board.tableaus.indexOf( active.newStack ) != -1 ) {
+
+    // New tableau must start with King
+    if ( active.newStack.length == 0 ) {
+      if ( card.rank != 12 ) {
+        return false;
       }
     }
 
-    active = null;
+    // Next tableau card must be previous rank and opposite suit color
+    else {
+      const prevCard = active.newStack.at( -1 );
 
-    draw();
+      if ( card.rank != prevCard.rank - 1 ) {
+        return false;
+      }
+
+      // If we are Club or Spade, previous card can't be Club or Spade
+      if ( ( card.suit == 0 || card.suit == 3 ) == ( prevCard.suit == 0 || prevCard.suit == 3 ) ) {
+        return false;
+      }
+    }
   }
+
+  return true;
+}
+
+function cancelActive( e ) {
+  if ( validateMove() ) { 
+    // Move card from old stack to new stack
+    active.newStack.splice( active.newStack.length, 0, ...active.oldStack.splice( active.oldStartIndex ) );
+    
+    // Flip new top card of tableau
+    if ( active.oldStack.length > 0 ) {
+      active.oldStack.at( -1 ).faceup = true;
+    }
+  }
+
+  active = null;
+
+  draw();
 }
 
 canvas.addEventListener( 'pointerup', cancelActive );

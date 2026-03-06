@@ -3,6 +3,13 @@ Changing active to use startIndex instead of card (to support multiple cards fro
   - Fix input
   - Fix drawing
 
+DONE: Can move stacks of cards between tableaus.
+
+NEXT: Start implementing rules to validate moves
+  - Probably need a way of knowing the type of destination stack
+    - Would it be better to store type and index instead of the actual stack?
+    - indexOf get there without changing data structure, but seems awkward
+
 3/4:
 
 Things still seem kind of blurry with the SVG
