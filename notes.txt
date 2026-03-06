@@ -16,6 +16,11 @@ I think I have the logic all in place!
 Now I just need a way to win and start over.
 Also, save/load progress when reloading page (should make testing much nicer!)
 
+Can fix bluriness by drawing SVG directly and not pre-rasterizing
+  - However, performance is noticeably terrible on my laptop
+  - The pre-rasterizing seemed like a good idea, 
+  - It would be nice if I could figure out how to not make it blurry
+
 
 3/4:
 

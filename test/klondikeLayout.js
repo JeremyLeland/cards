@@ -74,7 +74,7 @@ for ( let t = 0; t < 7; t ++ ) {
 // Better or worse than createImageBitmap? Supposedly that goes to GPU...
 
 // Rasterize a larger version of SVG to use
-const scale = devicePixelRatio * Card.Width / imageCardWidth;
+const scale = devicePixelRatio;// * Card.Width / imageCardWidth;
 const off = document.createElement( 'canvas' );
 off.width = image.width * scale;
 off.height = image.height * scale;
@@ -189,34 +189,35 @@ function drawCard( ctx, card, x, y ) {
   const srcCol = card.faceup ? card.rank : 2;
   const srcRow = card.faceup ? card.suit : 4;
 
+  ctx.drawImage(
+    off,
+
+    // source image is HiDPI
+    srcCol * devicePixelRatio * imageCardWidth, //Card.Width * devicePixelRatio,
+    srcRow * devicePixelRatio * imageCardHeight, //Card.Height * devicePixelRatio,
+    devicePixelRatio * imageCardWidth, //Card.Width * devicePixelRatio,
+    devicePixelRatio * imageCardHeight, //Card.Height * devicePixelRatio,
+
+    // destination is screen location
+    x,
+    y,
+    Card.Width,
+    Card.Height,
+  );
+
+  // This is much less blurry. How can I fix my pre-render?
   // ctx.drawImage(
-  //   off,
+  //   image,
+  //   srcCol * imageCardWidth,
+  //   srcRow * imageCardHeight,
+  //   imageCardWidth,
+  //   imageCardHeight,
 
-  //   // source image is HiDPI
-  //   srcCol * Card.Width * devicePixelRatio,
-  //   srcRow * Card.Height * devicePixelRatio,
-  //   Card.Width * devicePixelRatio,
-  //   Card.Height * devicePixelRatio,
-
-  //   // destination is screen location
   //   x,
   //   y,
   //   Card.Width,
   //   Card.Height,
   // );
-
-  ctx.drawImage(
-    image,
-    srcCol * imageCardWidth,
-    srcRow * imageCardHeight,
-    imageCardWidth,
-    imageCardHeight,
-
-    x,
-    y,
-    Card.Width,
-    Card.Height,
-  )
 }
 
 function resizeCanvas( canvas, width, height ) {
