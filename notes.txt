@@ -5,10 +5,17 @@ Changing active to use startIndex instead of card (to support multiple cards fro
 
 DONE: Can move stacks of cards between tableaus.
 
-NEXT: Start implementing rules to validate moves
+DONE: Start implementing rules to validate moves
   - Probably need a way of knowing the type of destination stack
     - Would it be better to store type and index instead of the actual stack?
     - indexOf get there without changing data structure, but seems awkward
+      - ended up leaving it this way for now
+
+I think I have the logic all in place!
+
+Now I just need a way to win and start over.
+Also, save/load progress when reloading page (should make testing much nicer!)
+
 
 3/4:
 

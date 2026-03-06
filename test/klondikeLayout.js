@@ -71,7 +71,7 @@ for ( let t = 0; t < 7; t ++ ) {
   board.tableaus[ t ].at( -1 ).faceup = true;
 }
 
-
+// Better or worse than createImageBitmap? Supposedly that goes to GPU...
 
 // Rasterize a larger version of SVG to use
 const scale = devicePixelRatio * Card.Width / imageCardWidth;
@@ -189,21 +189,34 @@ function drawCard( ctx, card, x, y ) {
   const srcCol = card.faceup ? card.rank : 2;
   const srcRow = card.faceup ? card.suit : 4;
 
+  // ctx.drawImage(
+  //   off,
+
+  //   // source image is HiDPI
+  //   srcCol * Card.Width * devicePixelRatio,
+  //   srcRow * Card.Height * devicePixelRatio,
+  //   Card.Width * devicePixelRatio,
+  //   Card.Height * devicePixelRatio,
+
+  //   // destination is screen location
+  //   x,
+  //   y,
+  //   Card.Width,
+  //   Card.Height,
+  // );
+
   ctx.drawImage(
-    off,
+    image,
+    srcCol * imageCardWidth,
+    srcRow * imageCardHeight,
+    imageCardWidth,
+    imageCardHeight,
 
-    // source image is HiDPI
-    srcCol * Card.Width * devicePixelRatio,
-    srcRow * Card.Height * devicePixelRatio,
-    Card.Width * devicePixelRatio,
-    Card.Height * devicePixelRatio,
-
-    // destination is screen location
     x,
     y,
     Card.Width,
     Card.Height,
-  );
+  )
 }
 
 function resizeCanvas( canvas, width, height ) {
