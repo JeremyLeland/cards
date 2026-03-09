@@ -1,4 +1,4 @@
-import * as Card from '../src/Card.js'
+import * as Card from '../src/EmojiCard.js'
 
 const canvas = document.createElement( 'canvas' );
 document.body.appendChild( canvas );
