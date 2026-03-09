@@ -1,3 +1,19 @@
+3/7:
+
+Save/load state
+  - Should be quick, and makes easier to test fixes if board state isn't always reseting
+
+3/6:
+
+Demo: lots of flipping cards
+  - Scale destination when drawing cards, change this amount by sin( time )
+  - Should have a bunch of "flipping" cards.
+  - Can also use this animation to test framerate with various drawing methods
+
+Resize so board always fits in window
+  - Divide canvas width by 7? (need to turn Position arrays into functions, then)
+  - Or use constant locations (where card size is 1?) and scale canvas to fit?
+
 3/5:
 Changing active to use startIndex instead of card (to support multiple cards from tableau)
   - Fix input
@@ -20,6 +36,11 @@ Can fix bluriness by drawing SVG directly and not pre-rasterizing
   - However, performance is noticeably terrible on my laptop
   - The pre-rasterizing seemed like a good idea, 
   - It would be nice if I could figure out how to not make it blurry
+    - Getting rid of my pre-scaling during rasterization seems to help
+    - Now some scaling is happening as part of every drawImage, I would think
+      - But it looks sharper
+      - And it's snappy on my laptop
+      - So I guess it's fine!
 
 
 3/4:

@@ -1,0 +1,465 @@
+// import * as Card from '../src/Card.js'
+
+import { GameState } from '../src/common/GameState.js';
+
+const Card = {
+  NumRanks: 13,
+  NumSuits: 4,
+  Width: 120,
+};
+
+const image = new Image();
+image.src = './images/Aisleriot_-_Anglo_playing_cards.svg';
+await image.decode();
+
+const imageCardWidth = image.width / Card.NumRanks;
+const imageCardHeight = image.height / ( Card.NumSuits + 1 );   // additional line has jokers and card back
+
+Card.Height = Card.Width * imageCardHeight / imageCardWidth;
+
+
+const Gap = 20;
+const HorizSpacing = Card.Width + Gap;
+const VertSpacing = Card.Height + Gap;
+
+const WasteOffset = { x: 30, y: 0 };
+const FoundationOffset = { x: 0, y: 0 };
+const TableauOffset = { x: 0, y: 24 };
+
+// https://en.wikipedia.org/wiki/Klondike_(solitaire)#Rules
+const Positions = {
+  Stock: { x: 0, y: 0 },
+  Waste: { x: HorizSpacing, y: 0 },
+  Foundations: [ 3, 4, 5, 6 ].map( i => ( { x: HorizSpacing * i, y: 0 } ) ),
+  Tableaus: [ 0, 1, 2, 3, 4, 5, 6 ].map( i => ( { x: HorizSpacing * i, y: VertSpacing } ) ),
+}
+
+
+let active;
+
+const gameState = new GameState( 'cards_klondikeLayout' );
+
+if ( !gameState.board ) {
+  gameState.board = newGame();
+}
+
+function newGame() {
+  const board = {
+    stock: [],
+    waste: [],
+    foundations: Array.from( Array( 4 ), _ => [] ),
+    tableaus:    Array.from( Array( 7 ), _ => [] ),
+  }
+
+  // Add all possible cards to stock, then shuffle
+  for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
+    for ( let rank = 0; rank < Card.NumRanks; rank ++ ) {
+      board.stock.push( {
+        rank: rank,
+        suit: suit,
+        faceup: false,
+      } );
+    }
+  }
+
+  shuffle( board.stock );
+
+  // Deal out tableaus
+  for ( let t = 0; t < 7; t ++ ) {
+    for ( let i = 0; i <= t; i ++ ) {
+      board.tableaus[ t ].push( board.stock.pop() );
+    }
+    board.tableaus[ t ].at( -1 ).faceup = true;
+  }
+
+  return board;
+}
+
+// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+function shuffle( array ) {
+  for ( let i = array.length - 1; i > 0; i -- ) {
+    const j = Math.floor( Math.random() * ( i + 1 ) );
+    [ array[ i ], array[ j ] ] = [ array[ j ], array[ i ] ];
+  }
+
+  return array;
+}
+
+
+// Better or worse than createImageBitmap? Supposedly that goes to GPU...
+// TODO: Maybe make an ImageBitmap from the offscreen canvas?
+// Seemed like createImageBitmap scaling looked crappy before, but I might've been doing something else wrong
+
+// Rasterize a larger version of SVG to use
+const scale = devicePixelRatio;// * Card.Width / imageCardWidth;
+const off = document.createElement( 'canvas' );
+off.width = image.width * scale;
+off.height = image.height * scale;
+
+const offCtx = off.getContext( '2d' );
+offCtx.scale( scale, scale );
+offCtx.drawImage( image, 0, 0 );
+
+// Prepare canvas
+const canvas = document.createElement( 'canvas' );
+canvas.oncontextmenu = () => { return false };
+document.body.appendChild( canvas );
+
+resizeCanvas( canvas, HorizSpacing * 7, Math.round( VertSpacing * 4 ) );
+
+const ctx = canvas.getContext( '2d' );
+
+function draw() {
+  // scaleX, skewY, skewX, scaleY, translateX, translateY
+  ctx.setTransform( devicePixelRatio, 0, 0, devicePixelRatio, 0, 0 );
+
+  ctx.fillStyle = '#123';
+  ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+  if ( gameState.board.stock.length > 0 ) {
+    drawCard( ctx, gameState.board.stock.at( -1 ), 0, 0 );
+  }
+  else {
+    drawCardOutline( ctx, 0, 0 );
+  }
+
+  // Draw the top 3 cards of the waste (or as many as we have)
+  drawCardOutline( ctx, HorizSpacing, 0 );
+
+  if ( gameState.board.waste.length > 0 ) {
+    const wasteStartIndex = Math.max( 0, gameState.board.waste.length - 3 );
+    const wasteDrawSize = Math.min( 3, gameState.board.waste.length );
+
+    for ( let cIndex = 0; cIndex < wasteDrawSize; cIndex ++ ) {
+      const wasteCardIndex = wasteStartIndex + cIndex;
+
+      if ( gameState.board.waste == active?.oldStack && wasteCardIndex == active.oldStartIndex ) {
+        break;
+      }
+
+      drawCard(
+        ctx,
+        gameState.board.waste[ wasteCardIndex ],
+        HorizSpacing + WasteOffset.x * cIndex,
+        0
+      );
+    }
+  }
+
+  gameState.board.foundations.forEach( ( foundation, fIndex ) => {
+    drawCardOutline( ctx, Positions.Foundations[ fIndex ].x, Positions.Foundations[ fIndex ].y );
+
+    // just draw top card
+    if ( foundation.length > 0 ) {
+      const topCard = foundation == active?.oldStack ? foundation.at( -2 ) : foundation.at( -1 );
+
+      if ( topCard ) {
+        drawCard( 
+          ctx, 
+          topCard, 
+          Positions.Foundations[ fIndex ].x, 
+          Positions.Foundations[ fIndex ].y,
+        );
+      }
+    }
+  } );
+
+  gameState.board.tableaus.forEach( ( tableau, tIndex ) => {
+    for ( let cIndex = 0; cIndex < tableau.length; cIndex ++ ) {
+      if ( tableau == active?.oldStack && cIndex == active.oldStartIndex ) {
+        break;
+      }
+
+      drawCard(
+        ctx,
+        tableau[ cIndex ],
+        Positions.Tableaus[ tIndex ].x,
+        Positions.Tableaus[ tIndex ].y + TableauOffset.y * cIndex,
+      );
+    }
+  } );
+
+  if ( active ) {
+    for ( let cIndex = active.oldStartIndex; cIndex < active.oldStack.length; cIndex ++ ) {
+      drawCard(
+        ctx,
+        active.oldStack[ cIndex ],
+        active.pos.x,
+        active.pos.y + TableauOffset.y * ( cIndex - active.oldStartIndex )
+      );
+    }
+  }
+}
+
+function drawCardOutline( ctx, x, y ) {
+  ctx.beginPath();
+  ctx.roundRect( x, y, Card.Width, Card.Height, 5 );
+  ctx.strokeStyle = 'white';
+  ctx.stroke();
+}
+
+draw();
+
+// If card is null, draw back
+function drawCard( ctx, card, x, y ) {
+
+  const srcCol = card.faceup ? card.rank : 2;
+  const srcRow = card.faceup ? card.suit : 4;
+
+  ctx.drawImage(
+    off,
+
+    // source image is HiDPI
+    srcCol * devicePixelRatio * imageCardWidth, //Card.Width * devicePixelRatio,
+    srcRow * devicePixelRatio * imageCardHeight, //Card.Height * devicePixelRatio,
+    devicePixelRatio * imageCardWidth, //Card.Width * devicePixelRatio,
+    devicePixelRatio * imageCardHeight, //Card.Height * devicePixelRatio,
+
+    // destination is screen location
+    x,
+    y,
+    Card.Width,
+    Card.Height,
+  );
+
+  // This is much less blurry. How can I fix my pre-render?
+  // ctx.drawImage(
+  //   image,
+  //   srcCol * imageCardWidth,
+  //   srcRow * imageCardHeight,
+  //   imageCardWidth,
+  //   imageCardHeight,
+
+  //   x,
+  //   y,
+  //   Card.Width,
+  //   Card.Height,
+  // );
+}
+
+function resizeCanvas( canvas, width, height ) {
+  // HiDPI canvas needs larger image for same display size
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  canvas.width = width * devicePixelRatio;
+  canvas.height = height * devicePixelRatio;
+}
+
+//
+// Input
+//
+
+canvas.addEventListener( 'pointerdown', e => {
+  // for this test, we are scrolling around large canvas, so we want pageX/Y
+  const mx = e.pageX;
+  const my = e.pageY;
+
+  // Stock
+  if ( 0 <= mx && mx <= Card.Width && 0 <= my && my <= Card.Height ) {
+    if ( gameState.board.stock.length > 0 ) {
+      for ( let i = 0; i < 3; i ++ ) {
+        const card = gameState.board.stock.pop();
+
+        if ( !card ) {
+          break;
+        }
+        
+        card.faceup = true;
+        gameState.board.waste.push( card );
+
+        // TODO: Some sort of "turn" animation here? maybe faceup has a timer for turn progress?
+      }
+    }
+    else {
+      while ( gameState.board.waste.length > 0 ) {
+        const card = gameState.board.waste.pop();
+        card.faceup = false;
+        gameState.board.stock.push( card );
+      }
+    }
+  }
+
+  // Waste
+  // TODO: Elegent way to avoid copying this below?
+  // act on array of [ 'waste', 'tableau' ] and iterate into positions based on this?
+  if ( gameState.board.waste.length > 0 ) {
+    const left = HorizSpacing + WasteOffset.x * Math.min( 2, gameState.board.waste.length - 1 );
+    const top  = 0;
+    const right = left + Card.Width;
+    const bottom = top + Card.Height;
+
+    if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+      active = {
+        oldStack: gameState.board.waste,
+        oldStartIndex: gameState.board.waste.length - 1,
+        newStack: null,
+        pos: { x: left, y: top },
+      }
+    }
+  }
+
+  // Foundation
+  gameState.board.foundations.find( ( foundation, fIndex ) => {
+    const left = Positions.Foundations[ fIndex ].x;
+    const top  = Positions.Foundations[ fIndex ].y
+    const right = left + Card.Width;
+    const bottom = top + Card.Height;
+
+    if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+      active = {
+        oldStack: foundation,
+        oldStartIndex: foundation.length - 1,
+        newStack: null,
+        pos: { x: left, y: top },
+      }
+
+      return true;
+    };
+
+    return false;
+  } );
+
+  // Tableau
+  gameState.board.tableaus.find( ( tableau, tIndex ) => {
+
+    // Start with top-most cards so we don't accidently match something lower down the stack
+    for ( let cIndex = tableau.length - 1; cIndex >= 0; cIndex -- ) {
+      if ( !tableau[ cIndex ].faceup ) {
+        break;
+      }
+
+      // TODO: Use the values from Positions instead?
+      const left = Positions.Tableaus[ tIndex ].x;
+      const top  = Positions.Tableaus[ tIndex ].y + TableauOffset.y * cIndex;
+      const right = left + Card.Width;
+      const bottom = top + Card.Height;
+
+      if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+        active = {
+          oldStack: tableau,
+          oldStartIndex: cIndex,
+          newStack: null,
+          pos: { x: left, y: top },
+        }
+
+        // break;
+        return true;
+      };
+    }
+
+    return false;
+  } );
+
+  draw();
+} );
+
+function validateMove() {
+  if ( !active ) {
+    return false;
+  }
+
+  if ( !active.newStack || active.oldStack == active.newStack ) {
+    return false;
+  }
+
+  const card = active.oldStack[ active.oldStartIndex ];
+
+  // Foundation
+  if ( gameState.board.foundations.indexOf( active.newStack ) != -1 ) {
+
+    // Can only put move one card at a time in foundation
+    // (stacks are always decreasing and alternate suits, so can never be valid)
+    if ( active.oldStartIndex < active.oldStack.length - 1 ) {
+      return false;
+    }
+
+    if ( active.newStack.length != card.rank ) {
+      return false;
+    }
+
+    if ( active.newStack.length > 0 && card.suit != active.newStack[ 0 ].suit ) {
+      return false;
+    }
+  }
+
+  // Tableau
+  else if ( gameState.board.tableaus.indexOf( active.newStack ) != -1 ) {
+
+    // New tableau must start with King
+    if ( active.newStack.length == 0 ) {
+      if ( card.rank != 12 ) {
+        return false;
+      }
+    }
+
+    // Next tableau card must be previous rank and opposite suit color
+    else {
+      const prevCard = active.newStack.at( -1 );
+
+      if ( card.rank != prevCard.rank - 1 ) {
+        return false;
+      }
+
+      // If we are Club or Spade, previous card can't be Club or Spade
+      if ( ( card.suit == 0 || card.suit == 3 ) == ( prevCard.suit == 0 || prevCard.suit == 3 ) ) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function cancelActive( e ) {
+  if ( validateMove() ) { 
+    // Move card from old stack to new stack
+    active.newStack.splice( active.newStack.length, 0, ...active.oldStack.splice( active.oldStartIndex ) );
+    
+    // Flip new top card of tableau
+    if ( active.oldStack.length > 0 ) {
+      active.oldStack.at( -1 ).faceup = true;
+    }
+  }
+
+  active = null;
+
+  draw();
+}
+
+canvas.addEventListener( 'pointerup', cancelActive );
+canvas.addEventListener( 'pointercancel', cancelActive );
+
+canvas.addEventListener( 'pointermove', e => {
+  if ( active && e.buttons == 1 ) {
+    active.pos.x += e.movementX;
+    active.pos.y += e.movementY;
+
+    const mx = e.pageX;
+    const my = e.pageY;
+
+    active.newStack = gameState.board.foundations.find ( ( foundation, fIndex ) => {
+      const left = Positions.Foundations[ fIndex ].x;
+      const top  = Positions.Foundations[ fIndex ].y;
+      const right = left + Card.Width;
+      const bottom = top + Card.Height;
+
+      return left <= mx && mx <= right && top <= my && my <= bottom;
+    } ) ?? gameState.board.tableaus.find( ( tableau, tIndex ) => {
+      const left = Positions.Tableaus[ tIndex ].x;
+      const top  = Positions.Tableaus[ tIndex ].y + TableauOffset.y * ( tableau.length - 1 );
+      const right = left + Card.Width;
+      const bottom = top + Card.Height;
+
+      return left <= mx && mx <= right && top <= my && my <= bottom;
+    } );
+
+    draw();
+  }
+} );
+
+document.addEventListener( 'keydown', e => {
+  if ( e.key == 'n' ) {
+    gameState.board = newGame();
+    draw();
+  }
+} );
