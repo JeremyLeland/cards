@@ -1,5 +1,6 @@
 // import * as Card from '../src/Card.js'
 
+import { GameCanvas } from '../src/common/GameCanvas.js';
 import { GameState } from '../src/common/GameState.js';
 
 const Card = {
@@ -101,18 +102,9 @@ offCtx.scale( scale, scale );
 offCtx.drawImage( image, 0, 0 );
 
 // Prepare canvas
-const canvas = document.createElement( 'canvas' );
-canvas.oncontextmenu = () => { return false };
-document.body.appendChild( canvas );
+const gameCanvas = new GameCanvas( HorizSpacing * 7, Math.round( VertSpacing * 4 ) );
 
-resizeCanvas( canvas, HorizSpacing * 7, Math.round( VertSpacing * 4 ) );
-
-const ctx = canvas.getContext( '2d' );
-
-function draw() {
-  // scaleX, skewY, skewX, scaleY, translateX, translateY
-  ctx.setTransform( devicePixelRatio, 0, 0, devicePixelRatio, 0, 0 );
-
+gameCanvas.draw = ( ctx ) => {
   ctx.fillStyle = '#123';
   ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
@@ -198,7 +190,7 @@ function drawCardOutline( ctx, x, y ) {
   ctx.stroke();
 }
 
-draw();
+gameCanvas.redraw();
 
 // If card is null, draw back
 function drawCard( ctx, card, x, y ) {
@@ -237,19 +229,12 @@ function drawCard( ctx, card, x, y ) {
   // );
 }
 
-function resizeCanvas( canvas, width, height ) {
-  // HiDPI canvas needs larger image for same display size
-  canvas.style.width = width + 'px';
-  canvas.style.height = height + 'px';
-  canvas.width = width * devicePixelRatio;
-  canvas.height = height * devicePixelRatio;
-}
 
 //
 // Input
 //
 
-canvas.addEventListener( 'pointerdown', e => {
+gameCanvas.canvas.addEventListener( 'pointerdown', e => {
   // for this test, we are scrolling around large canvas, so we want pageX/Y
   const mx = e.pageX;
   const my = e.pageY;
@@ -350,7 +335,7 @@ canvas.addEventListener( 'pointerdown', e => {
     return false;
   } );
 
-  draw();
+  gameCanvas.redraw();
 } );
 
 function validateMove() {
@@ -423,13 +408,13 @@ function cancelActive( e ) {
 
   active = null;
 
-  draw();
+  gameCanvas.redraw();
 }
 
-canvas.addEventListener( 'pointerup', cancelActive );
-canvas.addEventListener( 'pointercancel', cancelActive );
+gameCanvas.canvas.addEventListener( 'pointerup', cancelActive );
+gameCanvas.canvas.addEventListener( 'pointercancel', cancelActive );
 
-canvas.addEventListener( 'pointermove', e => {
+gameCanvas.canvas.addEventListener( 'pointermove', e => {
   if ( active && e.buttons == 1 ) {
     active.pos.x += e.movementX;
     active.pos.y += e.movementY;
@@ -453,13 +438,13 @@ canvas.addEventListener( 'pointermove', e => {
       return left <= mx && mx <= right && top <= my && my <= bottom;
     } );
 
-    draw();
+    gameCanvas.redraw();
   }
 } );
 
 document.addEventListener( 'keydown', e => {
   if ( e.key == 'n' ) {
     gameState.board = newGame();
-    draw();
+    gameCanvas.redraw();
   }
 } );

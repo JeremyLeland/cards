@@ -17,6 +17,9 @@ requestAnimationFrame( update );
 
 
 gameCanvas.draw = ( ctx ) => {
+  ctx.fillStyle = '#123';
+  ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
   for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
     for ( let rank = 0; rank < Card.NumRanks; rank ++ ) {
       const scale = Math.cos( time / 200 + rank + suit );

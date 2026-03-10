@@ -23,10 +23,11 @@ export class GameCanvas {
   }
 
   redraw() {
+    // scaleX, skewY, skewX, scaleY, translateX, translateY
     this.ctx.setTransform( devicePixelRatio, 0, 0, devicePixelRatio, 0, 0 );
 
     // TODO: Do I need to multiply by devicePixelRatio here?
-    this.ctx.clearRect( 0, 0, this.canvas.width, this.canvas.height );
+    // this.ctx.clearRect( 0, 0, this.canvas.width, this.canvas.height );
 
     this.draw( this.ctx );
   }
