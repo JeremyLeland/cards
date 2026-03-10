@@ -9,7 +9,6 @@ const HorizSpacing = Card.Width + Gap;
 const VertSpacing = Card.Height + Gap;
 
 const WasteOffset = { x: 30, y: 0 };
-const FoundationOffset = { x: 0, y: 0 };
 const TableauOffset = { x: 0, y: 24 };
 
 // https://en.wikipedia.org/wiki/Klondike_(solitaire)#Rules
@@ -76,11 +75,16 @@ function shuffle( array ) {
 // Prepare canvas
 const gameCanvas = new GameCanvas( HorizSpacing * 7, Math.round( VertSpacing * 4 ) );
 
+let scrollX = -0.5 * Card.Width;
+let scrollY = -0.5 * Card.Height;
+let scale = 0.75;
+
 gameCanvas.draw = ( ctx ) => {
   ctx.fillStyle = '#123';
   ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
-  ctx.translate( 0.5 * Card.Width, 0.5 * Card.Height );
+  ctx.scale( scale, scale );
+  ctx.translate( -scrollX, -scrollY );
 
   if ( gameState.board.stock.length > 0 ) {
     Card.draw( ctx, gameState.board.stock.at( -1 ), 0, 0 );
@@ -173,11 +177,11 @@ gameCanvas.redraw();
 
 gameCanvas.canvas.addEventListener( 'pointerdown', e => {
   // for this test, we are scrolling around large canvas, so we want pageX/Y
-  const mx = e.pageX;
-  const my = e.pageY;
+  const mx = e.pageX / scale + scrollX;
+  const my = e.pageY / scale + scrollY;
 
   // Stock
-  if ( 0 <= mx && mx <= Card.Width && 0 <= my && my <= Card.Height ) {
+  if ( Math.abs( mx - Positions.Stock.x ) <= Card.Width / 2 && Math.abs( my - Positions.Stock.y ) <= Card.Height / 2 ) {
     if ( gameState.board.stock.length > 0 ) {
       for ( let i = 0; i < 3; i ++ ) {
         const card = gameState.board.stock.pop();
@@ -205,34 +209,30 @@ gameCanvas.canvas.addEventListener( 'pointerdown', e => {
   // TODO: Elegent way to avoid copying this below?
   // act on array of [ 'waste', 'tableau' ] and iterate into positions based on this?
   if ( gameState.board.waste.length > 0 ) {
-    const left = HorizSpacing + WasteOffset.x * Math.min( 2, gameState.board.waste.length - 1 );
-    const top  = 0;
-    const right = left + Card.Width;
-    const bottom = top + Card.Height;
+    const x = HorizSpacing + WasteOffset.x * Math.min( 2, gameState.board.waste.length - 1 );
+    const y = 0;
 
-    if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+    if ( Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2 ) {
       active = {
         oldStack: gameState.board.waste,
         oldStartIndex: gameState.board.waste.length - 1,
         newStack: null,
-        pos: { x: left, y: top },
+        pos: { x: x, y: y },
       }
     }
   }
 
   // Foundation
   gameState.board.foundations.find( ( foundation, fIndex ) => {
-    const left = Positions.Foundations[ fIndex ].x;
-    const top  = Positions.Foundations[ fIndex ].y
-    const right = left + Card.Width;
-    const bottom = top + Card.Height;
+    const x = Positions.Foundations[ fIndex ].x;
+    const y = Positions.Foundations[ fIndex ].y
 
-    if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+     if ( Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2 ) {
       active = {
         oldStack: foundation,
         oldStartIndex: foundation.length - 1,
         newStack: null,
-        pos: { x: left, y: top },
+        pos: { x: x, y: y },
       }
 
       return true;
@@ -251,17 +251,15 @@ gameCanvas.canvas.addEventListener( 'pointerdown', e => {
       }
 
       // TODO: Use the values from Positions instead?
-      const left = Positions.Tableaus[ tIndex ].x;
-      const top  = Positions.Tableaus[ tIndex ].y + TableauOffset.y * cIndex;
-      const right = left + Card.Width;
-      const bottom = top + Card.Height;
+      const x = Positions.Tableaus[ tIndex ].x;
+      const y = Positions.Tableaus[ tIndex ].y + TableauOffset.y * cIndex;
 
-      if ( left <= mx && mx <= right && top <= my && my <= bottom ) {
+      if ( Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2 ) {
         active = {
           oldStack: tableau,
           oldStartIndex: cIndex,
           newStack: null,
-          pos: { x: left, y: top },
+          pos: { x: x, y: y },
         }
 
         // break;
@@ -353,26 +351,22 @@ gameCanvas.canvas.addEventListener( 'pointercancel', cancelActive );
 
 gameCanvas.canvas.addEventListener( 'pointermove', e => {
   if ( active && e.buttons == 1 ) {
-    active.pos.x += e.movementX;
-    active.pos.y += e.movementY;
+    active.pos.x += e.movementX / scale;
+    active.pos.y += e.movementY / scale;
 
-    const mx = e.pageX;
-    const my = e.pageY;
+    const mx = e.pageX / scale + scrollX;
+    const my = e.pageY / scale + scrollY;
 
     active.newStack = gameState.board.foundations.find ( ( foundation, fIndex ) => {
-      const left = Positions.Foundations[ fIndex ].x;
-      const top  = Positions.Foundations[ fIndex ].y;
-      const right = left + Card.Width;
-      const bottom = top + Card.Height;
+      const x = Positions.Foundations[ fIndex ].x;
+      const y = Positions.Foundations[ fIndex ].y;
 
-      return left <= mx && mx <= right && top <= my && my <= bottom;
+      return Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2;
     } ) ?? gameState.board.tableaus.find( ( tableau, tIndex ) => {
-      const left = Positions.Tableaus[ tIndex ].x;
-      const top  = Positions.Tableaus[ tIndex ].y + TableauOffset.y * ( tableau.length - 1 );
-      const right = left + Card.Width;
-      const bottom = top + Card.Height;
-
-      return left <= mx && mx <= right && top <= my && my <= bottom;
+      const x = Positions.Tableaus[ tIndex ].x;
+      const y = Positions.Tableaus[ tIndex ].y + TableauOffset.y * ( tableau.length - 1 );
+      
+      return Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2;
     } );
 
     gameCanvas.redraw();
