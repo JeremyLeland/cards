@@ -1,8 +1,41 @@
 3/10:
 
-Scaling to fit
+DONE: Scaling to fit
   - Set Card.Width to 1 and padding to a fraction thereof
   - Find the proper scale to fit 7 cards width-wise
+
+Tweaking SVG loading and scaling
+  - Fullscreen needs a bigger SVG
+  - Scaling with createImage resizeWidth is making things blurry
+    - Seems like if I load by making an Image() and setting src, it scales up rastered image
+    - ChatGPT is suggesting the fetch/blob thing that I couldn't get to work before
+    - Maybe worth another shot now
+      - Kept getting DOM errors
+      - This way works fine and lets me see the image size without shenanigans
+      - Just keep it
+
+Scale based on height as well as width
+  - We want enough space in the tableau for a lot of cards (not sure if there's a limit?)
+  - If we go full width on widescreen, no room for tableau
+  - Come up with a minimum height and limit that as needed
+    - Should also center in that case
+
+Simplify my position numbers
+  - Making all the card positions be whole numbers
+  - Make Card.Width be less than 1?
+  - This should put padding on both sides of table
+
+pointerEvent movementX/movementY seem unreliable for touch events
+  - Firefox has them going wrong direction? Or smaller
+  - Chrome has them smaller
+  - Maybe I should save last position and calculate these myself?
+    - Less elegent, was hoping I could just use movementX...
+
+It's really seeming like I had the right idea doing all of this myself in my custom canvas
+  - May end up pretty much doing that again
+  - With multiple places to keep track of scale and scroll (for drawing and input)
+    - probably best to do it all in one file
+
 
 3/9:
 

@@ -13,7 +13,7 @@ export const Height = Width * imageCardHeight / imageCardWidth;
 
 
 // // Rasterize a larger version of SVG to use
-const scale = 2;// devicePixelRatio;// * Card.Width / imageCardWidth;
+const scale = 1;// devicePixelRatio;// * Card.Width / imageCardWidth;
 const canvas = new OffscreenCanvas( image.width * scale, image.height * scale );
 const ctx = canvas.getContext( '2d' );
 ctx.drawImage( image, 0, 0, canvas.width, canvas.height );

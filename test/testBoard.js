@@ -74,16 +74,27 @@ function shuffle( array ) {
 
 // Prepare canvas
 const gameCanvas = new GameCanvas( 1, 1 );
+
 let scale = 1;
+let scrollX = 0;
+let scrollY = 0;
+
+const MinWidth = HorizSpacing * 7;
+const MinHeight = VertSpacing + TableauOffset.y * Card.NumRanks;
 
 window.onresize = () => {
-  scale = window.innerWidth / ( HorizSpacing * 7 );
+  const xScale = window.innerWidth / MinWidth;
+  const yScale = window.innerHeight / MinHeight;
+
+  scale = Math.min( xScale, yScale );
+
+  scrollX = -0.5 * Card.Width + ( MinWidth - window.innerWidth / scale ) / 2;
+  scrollY = -0.5 * Card.Height;
+
   gameCanvas.resize( window.innerWidth, window.innerHeight );
 }
 window.onresize();
 
-let scrollX = -0.5 * Card.Width;
-let scrollY = -0.5 * Card.Height;
 
 gameCanvas.draw = ( ctx ) => {
   ctx.fillStyle = '#123';
@@ -354,7 +365,7 @@ function cancelActive( e ) {
 }
 
 gameCanvas.canvas.addEventListener( 'pointerup', cancelActive );
-gameCanvas.canvas.addEventListener( 'pointercancel', cancelActive );
+gameCanvas.canvas.addEventListener( 'pointerout', cancelActive );
 
 gameCanvas.canvas.addEventListener( 'pointermove', e => {
   if ( active && e.buttons == 1 ) {
