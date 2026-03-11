@@ -3,11 +3,14 @@
 Still would like to try rasterizing the SVG at the precise width/height for the current canvas size
   - Scaling is working ok, but seems like there are bluriness or aliases in either direction
 
-DONE Put all the old canvas functionality back in
+DONE: Put all the old canvas functionality back in
   - Well, except for update
   - testBoard doesn't use that
 
-_ Use whole numbers for positions, make card smaller
+DONE: Use whole numbers for positions, make card smaller
+
+Make an option for whether canvas is centered or left/top aligned with extra space
+  - I think this case looks better top aligned
 
 3/10:
 

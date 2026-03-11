@@ -5,7 +5,7 @@ import { GameState } from '../src/common/GameState.js';
 
 
 const Gap = Card.Width / 6;
-const HorizSpacing = Card.Width + Gap;
+// const HorizSpacing = Card.Width + Gap;
 const VertSpacing = Card.Height + Gap;
 
 const WasteOffset = { x: 0.2, y: 0 };
@@ -14,9 +14,9 @@ const TableauOffset = { x: 0, y: 0.25 };
 // https://en.wikipedia.org/wiki/Klondike_(solitaire)#Rules
 const Positions = {
   Stock: { x: 0, y: 0 },
-  Waste: { x: HorizSpacing, y: 0 },
-  Foundations: [ 3, 4, 5, 6 ].map( i => ( { x: HorizSpacing * i, y: 0 } ) ),
-  Tableaus: [ 0, 1, 2, 3, 4, 5, 6 ].map( i => ( { x: HorizSpacing * i, y: VertSpacing } ) ),
+  Waste: { x: 1, y: 0 },
+  Foundations: [ 3, 4, 5, 6 ].map( i => ( { x: i, y: 0 } ) ),
+  Tableaus: [ 0, 1, 2, 3, 4, 5, 6 ].map( i => ( { x: i, y: VertSpacing } ) ),
 }
 
 
@@ -71,9 +71,9 @@ function shuffle( array ) {
 }
 
 const bounds = [
-  -Card.Width / 2,
-  -Card.Height / 2,
-  HorizSpacing * 7,
+  -0.5,
+  -0.7,
+  Positions.Tableaus.length - 0.5,
   VertSpacing + TableauOffset.y * Card.NumRanks
 ];
 

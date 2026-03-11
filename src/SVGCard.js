@@ -8,7 +8,7 @@ await image.decode();
 const imageCardWidth = image.width / NumRanks;
 const imageCardHeight = image.height / ( NumSuits + 1 );   // additional line has jokers and card back
 
-export const Width = 1;
+export const Width = 0.8;
 export const Height = Width * imageCardHeight / imageCardWidth;
 
 
