@@ -1,5 +1,6 @@
 export class GameCanvas {
   bounds = [ -5, -5, 5, 5 ];
+  backgroundColor = '#000';
 
   #scale = 1;
   #offsetX = 0;
@@ -110,10 +111,16 @@ export class GameCanvas {
     // scaleX, skewY, skewX, scaleY, translateX, translateY
     this.ctx.setTransform( devicePixelRatio, 0, 0, devicePixelRatio, 0, 0 );
 
-    this.ctx.clearRect( 0, 0, this.canvas.width, this.canvas.height );
-
     this.ctx.scale( this.#scale, this.#scale );
     this.ctx.translate( -this.#offsetX, -this.#offsetY );
+
+    this.ctx.fillStyle = this.backgroundColor;
+    this.ctx.fillRect(
+      this.#offsetX,
+      this.#offsetY,
+      this.bounds[ 2 ] - this.bounds[ 0 ] - this.#offsetX * 2,
+      this.bounds[ 3 ] - this.bounds[ 1 ] - this.#offsetY * 2,
+    );
 
     this.draw( this.ctx );
   }

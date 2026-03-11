@@ -70,29 +70,27 @@ function shuffle( array ) {
   return array;
 }
 
-
-const gameCanvas = new GameCanvas();
-gameCanvas.bounds = [
+const bounds = [
   -Card.Width / 2,
   -Card.Height / 2,
   HorizSpacing * 7,
   VertSpacing + TableauOffset.y * Card.NumRanks
 ];
 
+const gameCanvas = new GameCanvas();
+gameCanvas.bounds = bounds;
+gameCanvas.backgroundColor = '#123';
 
 gameCanvas.draw = ( ctx ) => {
-  // ctx.fillStyle = '#123';
-
-
   if ( gameState.board.stock.length > 0 ) {
     Card.draw( ctx, gameState.board.stock.at( -1 ), 0, 0 );
   }
   else {
-    drawCardOutline( ctx, 0, 0 );
+    drawCardOutline( ctx, Positions.Stock.x, Positions.Stock.y );
   }
 
   // Draw the top 3 cards of the waste (or as many as we have)
-  drawCardOutline( ctx, HorizSpacing, 0 );
+  drawCardOutline( ctx, Positions.Waste.x, Positions.Waste.y );
 
   if ( gameState.board.waste.length > 0 ) {
     const wasteStartIndex = Math.max( 0, gameState.board.waste.length - 3 );
@@ -108,8 +106,8 @@ gameCanvas.draw = ( ctx ) => {
       Card.draw(
         ctx,
         gameState.board.waste[ wasteCardIndex ],
-        HorizSpacing + WasteOffset.x * cIndex,
-        0
+        Positions.Waste.x + WasteOffset.x * cIndex,
+        Positions.Waste.y
       );
     }
   }
@@ -204,8 +202,8 @@ gameCanvas.pointerDown = ( m ) => {
   // TODO: Elegent way to avoid copying this below?
   // act on array of [ 'waste', 'tableau' ] and iterate into positions based on this?
   if ( gameState.board.waste.length > 0 ) {
-    const x = HorizSpacing + WasteOffset.x * Math.min( 2, gameState.board.waste.length - 1 );
-    const y = 0;
+    const x = Positions.Waste.x + WasteOffset.x * Math.min( 2, gameState.board.waste.length - 1 );
+    const y = Positions.Waste.y;
 
     if ( Math.abs( m.x - x ) <= Card.Width / 2 && Math.abs( m.y - y ) <= Card.Height / 2 ) {
       active = {
