@@ -20,14 +20,14 @@ export class GameCanvas {
     this.canvas.style.height = height + 'px';
     this.canvas.width = width * devicePixelRatio;
     this.canvas.height = height * devicePixelRatio;
+
+    this.redraw();
   }
 
   redraw() {
+    // Use setTransform to make sure no old transform is left behind if exception was thrown
     // scaleX, skewY, skewX, scaleY, translateX, translateY
     this.ctx.setTransform( devicePixelRatio, 0, 0, devicePixelRatio, 0, 0 );
-
-    // TODO: Do I need to multiply by devicePixelRatio here?
-    // this.ctx.clearRect( 0, 0, this.canvas.width, this.canvas.height );
 
     this.draw( this.ctx );
   }

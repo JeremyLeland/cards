@@ -1,3 +1,27 @@
+3/10:
+
+Scaling to fit
+  - Set Card.Width to 1 and padding to a fraction thereof
+  - Find the proper scale to fit 7 cards width-wise
+
+3/9:
+
+Put in save/load state by bringing in GameState.js
+
+Made a simpler version of my Canvas class in GameCanvas.js
+  - Seeing if I can do without the updating and input
+    - More of this should be doable with stock js
+    - However, the tie between canvas scale/scroll and input positions makes the larger class more tempting...
+
+Put scroll and scale in, in preparation for resizing based on browser size
+  - Still using my original positions
+  - Seems like these could be changed to multiples of 1 for simplicity, maybe at later point
+  - If I do this, I think I need to set Card.Width to 1 (so Card.Height gives me the relative ratio)
+    - I can probably continue to use Card.Width and Card.Height to plan positions
+      - I should make the Offsets relative to Card.Width/Height
+
+Can I center the canvas separately, so the input fixing doesn't have to know about that?
+
 3/7:
 
 Save/load state

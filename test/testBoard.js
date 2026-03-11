@@ -4,12 +4,12 @@ import { GameCanvas } from '../src/common/GameCanvas.js';
 import { GameState } from '../src/common/GameState.js';
 
 
-const Gap = 20;
+const Gap = Card.Width / 6;
 const HorizSpacing = Card.Width + Gap;
 const VertSpacing = Card.Height + Gap;
 
-const WasteOffset = { x: 30, y: 0 };
-const TableauOffset = { x: 0, y: 24 };
+const WasteOffset = { x: 0.2, y: 0 };
+const TableauOffset = { x: 0, y: 0.25 };
 
 // https://en.wikipedia.org/wiki/Klondike_(solitaire)#Rules
 const Positions = {
@@ -73,11 +73,17 @@ function shuffle( array ) {
 
 
 // Prepare canvas
-const gameCanvas = new GameCanvas( HorizSpacing * 7, Math.round( VertSpacing * 4 ) );
+const gameCanvas = new GameCanvas( 1, 1 );
+let scale = 1;
+
+window.onresize = () => {
+  scale = window.innerWidth / ( HorizSpacing * 7 );
+  gameCanvas.resize( window.innerWidth, window.innerHeight );
+}
+window.onresize();
 
 let scrollX = -0.5 * Card.Width;
 let scrollY = -0.5 * Card.Height;
-let scale = 0.75;
 
 gameCanvas.draw = ( ctx ) => {
   ctx.fillStyle = '#123';
@@ -163,8 +169,9 @@ gameCanvas.draw = ( ctx ) => {
 
 function drawCardOutline( ctx, x, y ) {
   ctx.beginPath();
-  ctx.roundRect( x - Card.Width / 2, y - Card.Height / 2, Card.Width, Card.Height, 5 );
+  ctx.roundRect( x - Card.Width / 2, y - Card.Height / 2, Card.Width, Card.Height, 5 / scale );
   ctx.strokeStyle = 'white';
+  ctx.lineWidth = 1 / scale;
   ctx.stroke();
 }
 

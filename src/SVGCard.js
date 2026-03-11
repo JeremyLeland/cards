@@ -8,23 +8,19 @@ await image.decode();
 const imageCardWidth = image.width / NumRanks;
 const imageCardHeight = image.height / ( NumSuits + 1 );   // additional line has jokers and card back
 
-export const Width = 120;
+export const Width = 1;
 export const Height = Width * imageCardHeight / imageCardWidth;
 
 
 // // Rasterize a larger version of SVG to use
-const scale = 1;// devicePixelRatio;// * Card.Width / imageCardWidth;
-// const off = document.createElement( 'canvas' );
-// off.width = image.width * scale;
-// off.height = image.height * scale;
+const scale = 2;// devicePixelRatio;// * Card.Width / imageCardWidth;
+const canvas = new OffscreenCanvas( image.width * scale, image.height * scale );
+const ctx = canvas.getContext( '2d' );
+ctx.drawImage( image, 0, 0, canvas.width, canvas.height );
 
-// const offCtx = off.getContext( '2d' );
-// offCtx.scale( scale, scale );
-// offCtx.drawImage( image, 0, 0 );
+const bmp = await createImageBitmap( canvas );
 
-// const bmp = await createImageBitmap( off );
-
-const bmp = await createImageBitmap( image );
+// const bmp = await createImageBitmap( image );
 
 //
 // Draw card centered at x,y with scale sx,sy
