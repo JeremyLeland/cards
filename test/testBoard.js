@@ -71,37 +71,18 @@ function shuffle( array ) {
 }
 
 
-
-// Prepare canvas
-const gameCanvas = new GameCanvas( 1, 1 );
-
-let scale = 1;
-let scrollX = 0;
-let scrollY = 0;
-
-const MinWidth = HorizSpacing * 7;
-const MinHeight = VertSpacing + TableauOffset.y * Card.NumRanks;
-
-window.onresize = () => {
-  const xScale = window.innerWidth / MinWidth;
-  const yScale = window.innerHeight / MinHeight;
-
-  scale = Math.min( xScale, yScale );
-
-  scrollX = -0.5 * Card.Width + ( MinWidth - window.innerWidth / scale ) / 2;
-  scrollY = -0.5 * Card.Height;
-
-  gameCanvas.resize( window.innerWidth, window.innerHeight );
-}
-window.onresize();
+const gameCanvas = new GameCanvas();
+gameCanvas.bounds = [
+  -Card.Width / 2,
+  -Card.Height / 2,
+  HorizSpacing * 7,
+  VertSpacing + TableauOffset.y * Card.NumRanks
+];
 
 
 gameCanvas.draw = ( ctx ) => {
-  ctx.fillStyle = '#123';
-  ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+  // ctx.fillStyle = '#123';
 
-  ctx.scale( scale, scale );
-  ctx.translate( -scrollX, -scrollY );
 
   if ( gameState.board.stock.length > 0 ) {
     Card.draw( ctx, gameState.board.stock.at( -1 ), 0, 0 );
@@ -141,10 +122,10 @@ gameCanvas.draw = ( ctx ) => {
       const topCard = foundation == active?.oldStack ? foundation.at( -2 ) : foundation.at( -1 );
 
       if ( topCard ) {
-        Card.draw( 
-          ctx, 
-          topCard, 
-          Positions.Foundations[ fIndex ].x, 
+        Card.draw(
+          ctx,
+          topCard,
+          Positions.Foundations[ fIndex ].x,
           Positions.Foundations[ fIndex ].y,
         );
       }
@@ -180,9 +161,9 @@ gameCanvas.draw = ( ctx ) => {
 
 function drawCardOutline( ctx, x, y ) {
   ctx.beginPath();
-  ctx.roundRect( x - Card.Width / 2, y - Card.Height / 2, Card.Width, Card.Height, 5 / scale );
+  ctx.roundRect( x - Card.Width / 2, y - Card.Height / 2, Card.Width, Card.Height, Card.Width / 15 );
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = 1 / scale;
+  ctx.lineWidth = Card.Width / 40;
   ctx.stroke();
 }
 
@@ -193,13 +174,9 @@ gameCanvas.redraw();
 // Input
 //
 
-gameCanvas.canvas.addEventListener( 'pointerdown', e => {
-  // for this test, we are scrolling around large canvas, so we want pageX/Y
-  const mx = e.pageX / scale + scrollX;
-  const my = e.pageY / scale + scrollY;
-
+gameCanvas.pointerDown = ( m ) => {
   // Stock
-  if ( Math.abs( mx - Positions.Stock.x ) <= Card.Width / 2 && Math.abs( my - Positions.Stock.y ) <= Card.Height / 2 ) {
+  if ( Math.abs( m.x - Positions.Stock.x ) <= Card.Width / 2 && Math.abs( m.y - Positions.Stock.y ) <= Card.Height / 2 ) {
     if ( gameState.board.stock.length > 0 ) {
       for ( let i = 0; i < 3; i ++ ) {
         const card = gameState.board.stock.pop();
@@ -207,7 +184,7 @@ gameCanvas.canvas.addEventListener( 'pointerdown', e => {
         if ( !card ) {
           break;
         }
-        
+
         card.faceup = true;
         gameState.board.waste.push( card );
 
@@ -230,7 +207,7 @@ gameCanvas.canvas.addEventListener( 'pointerdown', e => {
     const x = HorizSpacing + WasteOffset.x * Math.min( 2, gameState.board.waste.length - 1 );
     const y = 0;
 
-    if ( Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2 ) {
+    if ( Math.abs( m.x - x ) <= Card.Width / 2 && Math.abs( m.y - y ) <= Card.Height / 2 ) {
       active = {
         oldStack: gameState.board.waste,
         oldStartIndex: gameState.board.waste.length - 1,
@@ -245,7 +222,7 @@ gameCanvas.canvas.addEventListener( 'pointerdown', e => {
     const x = Positions.Foundations[ fIndex ].x;
     const y = Positions.Foundations[ fIndex ].y
 
-     if ( Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2 ) {
+     if ( Math.abs( m.x - x ) <= Card.Width / 2 && Math.abs( m.y - y ) <= Card.Height / 2 ) {
       active = {
         oldStack: foundation,
         oldStartIndex: foundation.length - 1,
@@ -272,7 +249,7 @@ gameCanvas.canvas.addEventListener( 'pointerdown', e => {
       const x = Positions.Tableaus[ tIndex ].x;
       const y = Positions.Tableaus[ tIndex ].y + TableauOffset.y * cIndex;
 
-      if ( Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2 ) {
+      if ( Math.abs( m.x - x ) <= Card.Width / 2 && Math.abs( m.y - y ) <= Card.Height / 2 ) {
         active = {
           oldStack: tableau,
           oldStartIndex: cIndex,
@@ -289,7 +266,7 @@ gameCanvas.canvas.addEventListener( 'pointerdown', e => {
   } );
 
   gameCanvas.redraw();
-} );
+};
 
 function validateMove() {
   if ( !active ) {
@@ -348,11 +325,11 @@ function validateMove() {
   return true;
 }
 
-function cancelActive( e ) {
-  if ( validateMove() ) { 
+gameCanvas.pointerUp = _ => {
+  if ( validateMove() ) {
     // Move card from old stack to new stack
     active.newStack.splice( active.newStack.length, 0, ...active.oldStack.splice( active.oldStartIndex ) );
-    
+
     // Flip new top card of tableau
     if ( active.oldStack.length > 0 ) {
       active.oldStack.at( -1 ).faceup = true;
@@ -362,34 +339,28 @@ function cancelActive( e ) {
   active = null;
 
   gameCanvas.redraw();
-}
+};
 
-gameCanvas.canvas.addEventListener( 'pointerup', cancelActive );
-gameCanvas.canvas.addEventListener( 'pointerout', cancelActive );
-
-gameCanvas.canvas.addEventListener( 'pointermove', e => {
-  if ( active && e.buttons == 1 ) {
-    active.pos.x += e.movementX / scale;
-    active.pos.y += e.movementY / scale;
-
-    const mx = e.pageX / scale + scrollX;
-    const my = e.pageY / scale + scrollY;
+gameCanvas.pointerMove = ( m ) => {
+  if ( active && m.buttons == 1 ) {
+    active.pos.x += m.dx;
+    active.pos.y += m.dy;
 
     active.newStack = gameState.board.foundations.find ( ( foundation, fIndex ) => {
       const x = Positions.Foundations[ fIndex ].x;
       const y = Positions.Foundations[ fIndex ].y;
 
-      return Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2;
+      return Math.abs( m.x - x ) <= Card.Width / 2 && Math.abs( m.y - y ) <= Card.Height / 2;
     } ) ?? gameState.board.tableaus.find( ( tableau, tIndex ) => {
       const x = Positions.Tableaus[ tIndex ].x;
       const y = Positions.Tableaus[ tIndex ].y + TableauOffset.y * ( tableau.length - 1 );
-      
-      return Math.abs( mx - x ) <= Card.Width / 2 && Math.abs( my - y ) <= Card.Height / 2;
+
+      return Math.abs( m.x - x ) <= Card.Width / 2 && Math.abs( m.y - y ) <= Card.Height / 2;
     } );
 
     gameCanvas.redraw();
   }
-} );
+};
 
 document.addEventListener( 'keydown', e => {
   if ( e.key == 'n' ) {

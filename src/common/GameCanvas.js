@@ -1,36 +1,127 @@
-// Making a simpler version of my custom Canvas class
-// This helps keep the HiDPI tricks and a few common settings in one place
-// (but hopefully won't get as long winded as the other one) 
-
 export class GameCanvas {
-  constructor( width, height ) {
-    this.canvas = document.createElement( 'canvas' );
-    document.body.appendChild( this.canvas );
+  bounds = [ -5, -5, 5, 5 ];
 
-    this.canvas.oncontextmenu = () => { return false };
+  #scale = 1;
+  #offsetX = 0;
+  #offsetY = 0;
+
+  #mouse = {};
+
+  constructor( canvas ) {
+    if ( canvas ) {
+      this.canvas = canvas;
+    }
+    else {
+      this.canvas = document.createElement( 'canvas' );
+      document.body.appendChild( this.canvas );
+
+      Object.assign( this.canvas.style, {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: '100vw',
+        height: '100vh',
+      } );
+    }
 
     this.ctx = this.canvas.getContext( '2d' );
 
-    this.resize( width, height );
+    this.canvas.oncontextmenu = () => { return false };
+
+    //
+    // Resize canvas
+    //
+
+    new ResizeObserver( _ => {
+      const cssWidth = this.canvas.clientWidth;
+      const cssHeight = this.canvas.clientHeight;
+
+      this.canvas.width = cssWidth * devicePixelRatio;
+      this.canvas.height = cssHeight * devicePixelRatio;
+
+      const minWidth = this.bounds[ 2 ] - this.bounds[ 0 ];
+      const minHeight = this.bounds[ 3 ] - this.bounds[ 1 ];
+
+      const xScale = cssWidth / minWidth;
+      const yScale = cssHeight / minHeight;
+
+      this.#scale = Math.min( xScale, yScale );
+
+      this.#offsetX = this.bounds[ 0 ] + ( minWidth - cssWidth / this.#scale ) / 2;
+      this.#offsetY = this.bounds[ 1 ] + ( minHeight - cssHeight / this.#scale ) / 2;
+
+      this.redraw();
+    } ).observe( this.canvas );
+
+    //
+    // Pointer input
+    //
+
+    this.canvas.addEventListener( 'pointerdown', e => {
+      this.#updatePointerInfo( e );
+      this.pointerDown( this.#mouse );
+    } );
+
+    this.canvas.addEventListener( 'pointermove', e => {
+      this.#updatePointerInfo( e );
+      this.pointerMove( this.#mouse );
+
+      // TODO: Do we need this? Why did we do this?
+      this.#mouse.dx = 0;
+      this.#mouse.dy = 0;
+    } );
+
+    this.canvas.addEventListener( 'pointerup', e => {
+      this.#updatePointerInfo( e );
+      this.pointerUp( this.#mouse );
+    } );
+
+    this.canvas.addEventListener( 'pointerout', e => {
+      this.#updatePointerInfo( e );
+      this.pointerUp( this.#mouse );
+    } );
+
+    this.canvas.addEventListener( 'wheel', e => {
+      this.#updatePointerInfo( e );
+      this.wheelInput( this.#mouse );
+
+      // TODO: Do we still need this?
+      this.#mouse.wheel = 0;
+
+      e.preventDefault();
+    } );
   }
 
-  resize( width, height ) {
-    // HiDPI canvas needs larger image for same display size
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.height = height + 'px';
-    this.canvas.width = width * devicePixelRatio;
-    this.canvas.height = height * devicePixelRatio;
-
-    this.redraw();
+  #updatePointerInfo( e ) {
+    const lastX = this.#mouse.x ?? undefined;
+    const lastY = this.#mouse.y ?? undefined;
+    this.#mouse.x = e.pageX / this.#scale + this.#offsetX;
+    this.#mouse.y = e.pageY / this.#scale + this.#offsetY;
+    this.#mouse.dx = lastX ? this.#mouse.x - lastX : 0;
+    this.#mouse.dy = lastY ? this.#mouse.y - lastY : 0;
+    this.#mouse.buttons = e.buttons;
+    this.#mouse.wheel = e.wheelDelta;
+    this.#mouse.shiftKey = e.shiftKey;
+    this.#mouse.ctrlKey = e.ctrlKey;
+    this.#mouse.altKey = e.altKey;
   }
 
   redraw() {
-    // Use setTransform to make sure no old transform is left behind if exception was thrown
     // scaleX, skewY, skewX, scaleY, translateX, translateY
     this.ctx.setTransform( devicePixelRatio, 0, 0, devicePixelRatio, 0, 0 );
+
+    this.ctx.clearRect( 0, 0, this.canvas.width, this.canvas.height );
+
+    this.ctx.scale( this.#scale, this.#scale );
+    this.ctx.translate( -this.#offsetX, -this.#offsetY );
 
     this.draw( this.ctx );
   }
 
   draw( ctx ) {}
+
+  pointerDown( pointerInfo ) {}
+  pointerMove( pointerInfo ) {}
+  pointerUp( pointerInfo ) {}
+  wheelInput( pointerInfo ) {}
 }

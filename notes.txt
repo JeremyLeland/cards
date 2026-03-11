@@ -1,3 +1,14 @@
+3/11:
+
+Still would like to try rasterizing the SVG at the precise width/height for the current canvas size
+  - Scaling is working ok, but seems like there are bluriness or aliases in either direction
+
+DONE Put all the old canvas functionality back in
+  - Well, except for update
+  - testBoard doesn't use that
+
+_ Use whole numbers for positions, make card smaller
+
 3/10:
 
 DONE: Scaling to fit
@@ -91,7 +102,7 @@ Also, save/load progress when reloading page (should make testing much nicer!)
 
 Can fix bluriness by drawing SVG directly and not pre-rasterizing
   - However, performance is noticeably terrible on my laptop
-  - The pre-rasterizing seemed like a good idea, 
+  - The pre-rasterizing seemed like a good idea,
   - It would be nice if I could figure out how to not make it blurry
     - Getting rid of my pre-scaling during rasterization seems to help
     - Now some scaling is happening as part of every drawImage, I would think
@@ -194,7 +205,7 @@ Got the SVG looking decent, I think
 
 Directly drawing via canvas is still my favorite
   - just in terms of feel and fun. The emjoi cards are kind of cute, and it feels clever to do this
-  - But it is pretty limiting, and harder to control precisely 
+  - But it is pretty limiting, and harder to control precisely
     - different fonts on different systems, especially the emjois
 
 SVG notes
@@ -242,7 +253,7 @@ Easy to find SVGs with entire deck of cards in one image
 
 SVG drawing was kind of blurry. Dealing with HiDPI adds more headaches.
   - Got something that worked, but I feel like it's blurry
-  - My custom canvas was causing problems. 
+  - My custom canvas was causing problems.
     - Not sure where, but might be good practice to make a simpler one
     - Generate a matrix for bounds, apply this matrix to mouse coords?
       - Is this any easier than what I'm currently doing saving transform and scale separately?
