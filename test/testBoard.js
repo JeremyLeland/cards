@@ -25,16 +25,17 @@ let active;
 const gameState = new GameState( 'cards_klondikeLayout' );
 
 if ( !gameState.board ) {
-  gameState.board = newGame();
+  gameState.board = newBoard();
 }
 
-function newGame() {
+function newBoard() {
   const board = {
     stock: [],
     waste: [],
     foundations: Array.from( Array( 4 ), _ => [] ),
     tableaus:    Array.from( Array( 7 ), _ => [] ),
-  }
+    victory: false,
+  };
 
   // Add all possible cards to stock, then shuffle
   for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
@@ -156,6 +157,32 @@ gameCanvas.draw = ( ctx ) => {
       );
     }
   }
+
+  // Firefox needs text to be "bigger"
+  ctx.scale( 0.1, 0.1 );
+
+  if ( gameState.board.victory ) {
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'white';
+    ctx.shadowColor = 'black';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 8;
+    ctx.shadowOffsetY = 8;
+    ctx.fillText( 'Victory!', 30, 15 );
+
+    ctx.font = '2px Arial';
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText( 'Click to Continue', 30, 22 );
+
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  }
 }
 
 function drawCardOutline( ctx, x, y ) {
@@ -173,7 +200,17 @@ gameCanvas.redraw();
 // Input
 //
 
+function newGame() {
+  gameState.board = newBoard();
+  gameCanvas.redraw();
+}
+
 gameCanvas.pointerDown = ( m ) => {
+  if ( gameState.board.victory ) {
+    newGame();
+    return;
+  }
+
   // Stock
   if ( Math.abs( m.x - Positions.Stock.x ) <= Card.Width / 2 && Math.abs( m.y - Positions.Stock.y ) <= Card.Height / 2 ) {
     if ( gameState.board.stock.length > 0 ) {
@@ -333,6 +370,9 @@ gameCanvas.pointerUp = _ => {
     if ( active.oldStack.length > 0 ) {
       active.oldStack.at( -1 ).faceup = true;
     }
+
+    // Check for victory
+    gameState.board.victory = gameState.board.foundations.every( e => e.length == Card.NumRanks );
   }
 
   active = null;
@@ -363,7 +403,6 @@ gameCanvas.pointerMove = ( m ) => {
 
 document.addEventListener( 'keydown', e => {
   if ( e.key == 'n' ) {
-    gameState.board = newGame();
-    gameCanvas.redraw();
+    newGame();
   }
 } );

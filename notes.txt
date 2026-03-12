@@ -11,11 +11,19 @@ DONE: Put all the old canvas functionality back in
 
 DONE: Use whole numbers for positions, make card smaller
 
-Make an option for whether canvas is centered or left/top aligned with extra space
+DONE: Make an option for whether canvas is centered or left/top aligned with extra space
   - I think this case looks better top aligned
 
-Guess we also need a way to win at some point...
-  - Check the foundations for NumRanks cards and assume the rules were correctly followed?
+DONE: Guess we also need a way to win at some point...
+  - Check the foundations for NumRanks cards and assume the rules were correctly followed
+
+Option for 1 card vs 3 card draw
+  - Can easily toggle with a key for testing
+  - How would I show options otherwise?
+
+Way of telling when game is lost?
+  - No possible moves
+  - Easy from tableau, harder from deck...need to account for cycling through?
 
 3/10:
 
