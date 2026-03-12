@@ -80,6 +80,7 @@ const bounds = [
 const gameCanvas = new GameCanvas();
 gameCanvas.bounds = bounds;
 gameCanvas.backgroundColor = '#123';
+gameCanvas.centerVertically = false;    // looks better with cards at top of screen
 
 gameCanvas.draw = ( ctx ) => {
   if ( gameState.board.stock.length > 0 ) {

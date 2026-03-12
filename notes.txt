@@ -2,6 +2,8 @@
 
 Still would like to try rasterizing the SVG at the precise width/height for the current canvas size
   - Scaling is working ok, but seems like there are bluriness or aliases in either direction
+  - Turns out ChatGPT was full of shit, neither Firefox nor Chrome will createImage from an SVG blob
+    - Security reasons or something
 
 DONE: Put all the old canvas functionality back in
   - Well, except for update
@@ -11,6 +13,9 @@ DONE: Use whole numbers for positions, make card smaller
 
 Make an option for whether canvas is centered or left/top aligned with extra space
   - I think this case looks better top aligned
+
+Guess we also need a way to win at some point...
+  - Check the foundations for NumRanks cards and assume the rules were correctly followed?
 
 3/10:
 

@@ -2,6 +2,9 @@ export class GameCanvas {
   bounds = [ -5, -5, 5, 5 ];
   backgroundColor = '#000';
 
+  centerHorizontally = true;
+  centerVertically = true;
+
   #scale = 1;
   #offsetX = 0;
   #offsetY = 0;
@@ -48,8 +51,8 @@ export class GameCanvas {
 
       this.#scale = Math.min( xScale, yScale );
 
-      this.#offsetX = this.bounds[ 0 ] + ( minWidth - cssWidth / this.#scale ) / 2;
-      this.#offsetY = this.bounds[ 1 ] + ( minHeight - cssHeight / this.#scale ) / 2;
+      this.#offsetX = this.bounds[ 0 ] + ( this.centerHorizontally ? ( minWidth - cssWidth / this.#scale ) / 2 : 0 );
+      this.#offsetY = this.bounds[ 1 ] + ( this.centerVertically ? ( minHeight - cssHeight / this.#scale ) / 2 : 0 );
 
       this.redraw();
     } ).observe( this.canvas );
@@ -118,8 +121,8 @@ export class GameCanvas {
     this.ctx.fillRect(
       this.#offsetX,
       this.#offsetY,
-      this.bounds[ 2 ] - this.bounds[ 0 ] - this.#offsetX * 2,
-      this.bounds[ 3 ] - this.bounds[ 1 ] - this.#offsetY * 2,
+      this.canvas.clientWidth / this.#scale,
+      this.canvas.clientHeight / this.#scale,
     );
 
     this.draw( this.ctx );
