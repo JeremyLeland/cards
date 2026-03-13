@@ -1,3 +1,20 @@
+3/12:
+
+Copied code into Solitaire.js in src and made an index
+Posted to games page
+  - It's playable
+  - I'm mostly just gonna mess with stuff at this point
+  - I can at least feel like I accomplished something show-off-able
+
+DONE: Try it on phone/ipad
+  - See if there's any safari weirdness or touch weirdness
+  - Incorporating touchAction=none and userSelect=none into GameCanvas styles
+    - Seems to fix
+
+Still might play with animations
+
+Still might play with SVG scaling to exactly the size we want
+
 3/11:
 
 Still would like to try rasterizing the SVG at the precise width/height for the current canvas size
