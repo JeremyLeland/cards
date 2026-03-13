@@ -5,6 +5,9 @@ export class GameCanvas {
   centerHorizontally = true;
   centerVertically = true;
 
+  #lastTime;
+  #isAnimated = false;
+
   #scale = 1;
   #offsetX = 0;
   #offsetY = 0;
@@ -112,6 +115,35 @@ export class GameCanvas {
     this.#mouse.altKey = e.altKey;
   }
 
+  //
+  // Animation (update loop)
+  //
+  #animate = ( now ) => {
+    this.#lastTime ??= now;
+    this.update( Math.min( now - this.#lastTime, 100 ) );   // prevent large updates from delays
+    this.#lastTime = now;
+
+    this.redraw();
+
+    if ( this.#isAnimated ) {
+      requestAnimationFrame( this.#animate );
+    }
+  }
+
+  start() {
+    if ( !this.#isAnimated ) {
+      this.#isAnimated = true;
+      requestAnimationFrame( this.#animate );
+    }
+  }
+
+  stop() {
+    this.#isAnimated = false;
+  }
+
+  //
+  // Drawing
+  //
   redraw() {
     // scaleX, skewY, skewX, scaleY, translateX, translateY
     this.ctx.setTransform( devicePixelRatio, 0, 0, devicePixelRatio, 0, 0 );
@@ -130,6 +162,10 @@ export class GameCanvas {
     this.draw( this.ctx );
   }
 
+  //
+  // Users override these functions
+  //
+  update( dt ) {}
   draw( ctx ) {}
 
   pointerDown( pointerInfo ) {}

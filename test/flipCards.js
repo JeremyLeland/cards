@@ -2,24 +2,17 @@ import { GameCanvas } from '../src/common/GameCanvas.js';
 
 import * as Card from '../src/SVGCard.js';
 
-const gameCanvas = new GameCanvas( Card.Width * Card.NumRanks, Card.Height * Card.NumSuits );
+const gameCanvas = new GameCanvas();
+gameCanvas.bounds = [ 0, 0, Card.Width * Card.NumRanks, Card.Height * Card.NumSuits ];
+gameCanvas.backgroundColor = '#123';
 
-let time;
+let time = 0;
 
-function update( now ) {
-  time = now;
-
-  gameCanvas.redraw();
-
-  requestAnimationFrame( update );
+gameCanvas.update = ( dt ) => {
+  time += dt;
 }
-requestAnimationFrame( update );
-
 
 gameCanvas.draw = ( ctx ) => {
-  ctx.fillStyle = '#123';
-  ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
-
   for ( let suit = 0; suit < Card.NumSuits; suit ++ ) {
     for ( let rank = 0; rank < Card.NumRanks; rank ++ ) {
       const scale = Math.cos( time / 200 + rank + suit );
@@ -28,3 +21,5 @@ gameCanvas.draw = ( ctx ) => {
     }
   }
 }
+
+gameCanvas.start();
